@@ -9,11 +9,11 @@ const ScoreBar = ({ value, max, color, label }) => {
   return (
     <div style={{ marginBottom: '0.8rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5,
-        fontSize: '0.88rem', fontWeight: 600, color: '#64748b' }}>
+        fontSize: '0.88rem', fontWeight: 600, color: '#697061' }}>
         <span>{label}</span>
         <span style={{ color }}>{value}/{max} ({Math.round(pct)}%)</span>
       </div>
-      <div style={{ background: '#f1f5f9', borderRadius: '8px', height: '12px', overflow: 'hidden' }}>
+      <div style={{ background: '#eeefe7', borderRadius: '8px', height: '12px', overflow: 'hidden' }}>
         <div style={{ width: `${Math.min(100, pct)}%`, height: '100%',
           background: color, borderRadius: '8px', transition: 'width 0.8s ease' }} />
       </div>
@@ -51,7 +51,7 @@ export default function CompareResults() {
   if (error || !data) {
     return (
       <div className="page" style={{ paddingTop: '2rem' }}>
-        <div className="card" style={{ textAlign: 'center', color: '#ef4444' }}>
+        <div className="card" style={{ textAlign: 'center', color: '#9b514b' }}>
           <p> {error || 'Could not load comparison data'}</p>
           <button className="btn back-btn" style={{ marginTop: '1rem' }}
             onClick={() => navigate('/results')}>← Back to Results</button>
@@ -80,7 +80,7 @@ export default function CompareResults() {
   const improved  = marksDiff !== null && marksDiff > 0;
   const decreased = marksDiff !== null && marksDiff < 0;
 
-  const changeColor = improved ? '#059669' : decreased ? '#ef4444' : '#64748b';
+  const changeColor = improved ? '#52715b' : decreased ? '#9b514b' : '#697061';
   const changeLabel = improved ? 'Improvement' : decreased ? 'Decrease' : 'No Change';
 
 
@@ -96,8 +96,8 @@ export default function CompareResults() {
 
       {/* Session summary */}
       <div style={{
-        background: 'linear-gradient(135deg,rgba(37,99,235,0.08) 0%,rgba(124,58,237,0.08) 100%)',
-        border: '1px solid rgba(37,99,235,0.25)', borderRadius: '18px',
+        background: '#eeefe5',
+        border: '1px solid rgba(66,95,80,0.25)', borderRadius: '18px',
         padding: '1.2rem 1.5rem', marginBottom: '2rem', width: '100%',
       }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.8rem' }}>
@@ -108,10 +108,10 @@ export default function CompareResults() {
             { label: 'Maximum Marks', value: maxMarks || '—' },
           ].map(item => (
             <div key={item.label}>
-              <div style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 600, marginBottom: 2 }}>
+              <div style={{ fontSize: '0.78rem', color: '#697061', fontWeight: 600, marginBottom: 2 }}>
                 {item.label}
               </div>
-              <div style={{ fontSize: '0.98rem', fontWeight: 700, color: '#0f172a' }}>
+              <div style={{ fontSize: '0.98rem', fontWeight: 700, color: '#263c34' }}>
                 {item.value || '—'}
               </div>
             </div>
@@ -123,28 +123,28 @@ export default function CompareResults() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.2rem', width: '100%', marginBottom: '2rem' }}>
         {/* Test A */}
         <div style={{
-          background: 'white', border: '2px solid #bfdbfe', borderRadius: '20px', padding: '1.8rem',
-          textAlign: 'center', boxShadow: '0 4px 15px rgba(37,99,235,0.1)',
+          background: 'white', border: '2px solid #c6d1bc', borderRadius: '10px', padding: '1.8rem',
+          textAlign: 'center', boxShadow: 'none',
         }}>
-          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#2563eb', textTransform: 'uppercase',
+          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#425f50', textTransform: 'uppercase',
             marginBottom: 8, letterSpacing: '0.5px' }}>
              Test A — Baseline
           </div>
           {baselineScore !== null ? (
             <>
-              <div style={{ fontSize: '3rem', fontWeight: 900, color: '#2563eb', lineHeight: 1 }}>
+              <div style={{ fontSize: '3rem', fontWeight: 900, color: '#425f50', lineHeight: 1 }}>
                 {baselineScore}
-                <span style={{ fontSize: '1.4rem', color: '#94a3b8' }}>/{maxMarks}</span>
+                <span style={{ fontSize: '1.4rem', color: '#697061' }}>/{maxMarks}</span>
               </div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#2563eb', marginTop: 4 }}>
+              <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#425f50', marginTop: 4 }}>
                 {basePct}%
               </div>
-              <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: 4 }}>
+              <div style={{ fontSize: '0.8rem', color: '#697061', marginTop: 4 }}>
                 After textbook reading
               </div>
             </>
           ) : (
-            <div style={{ color: '#94a3b8', fontSize: '1rem', padding: '1rem 0' }}>
+            <div style={{ color: '#697061', fontSize: '1rem', padding: '1rem 0' }}>
               Not yet completed
             </div>
           )}
@@ -152,28 +152,28 @@ export default function CompareResults() {
 
         {/* Test B */}
         <div style={{
-          background: 'white', border: '2px solid #c4b5fd', borderRadius: '20px', padding: '1.8rem',
-          textAlign: 'center', boxShadow: '0 4px 15px rgba(124,58,237,0.1)',
+          background: 'white', border: '2px solid #d3ceb9', borderRadius: '10px', padding: '1.8rem',
+          textAlign: 'center', boxShadow: 'none',
         }}>
-          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#7c3aed', textTransform: 'uppercase',
+          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#787565', textTransform: 'uppercase',
             marginBottom: 8, letterSpacing: '0.5px' }}>
              Test B — Final
           </div>
           {finalScore !== null ? (
             <>
-              <div style={{ fontSize: '3rem', fontWeight: 900, color: '#7c3aed', lineHeight: 1 }}>
+              <div style={{ fontSize: '3rem', fontWeight: 900, color: '#787565', lineHeight: 1 }}>
                 {finalScore}
-                <span style={{ fontSize: '1.4rem', color: '#94a3b8' }}>/{maxMarks}</span>
+                <span style={{ fontSize: '1.4rem', color: '#697061' }}>/{maxMarks}</span>
               </div>
-              <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#7c3aed', marginTop: 4 }}>
+              <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#787565', marginTop: 4 }}>
                 {finalPct}%
               </div>
-              <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: 4 }}>
+              <div style={{ fontSize: '0.8rem', color: '#697061', marginTop: 4 }}>
                 After {session?.dominant_intelligence || 'spatial'} learning
               </div>
             </>
           ) : (
-            <div style={{ color: '#94a3b8', fontSize: '1rem', padding: '1rem 0' }}>
+            <div style={{ color: '#697061', fontSize: '1rem', padding: '1rem 0' }}>
               Not yet completed
             </div>
           )}
@@ -183,14 +183,14 @@ export default function CompareResults() {
       {/* Score bars */}
       {(baselineScore !== null || finalScore !== null) && maxMarks > 0 && (
         <div className="card" style={{ padding: '1.8rem', marginBottom: '1.5rem' }}>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: '#0f172a', marginBottom: '1.2rem' }}>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: '#263c34', marginBottom: '1.2rem' }}>
              Score Comparison
           </h3>
           {baselineScore !== null && (
-            <ScoreBar value={baselineScore} max={maxMarks} color="#2563eb" label="Test A (Baseline)" />
+            <ScoreBar value={baselineScore} max={maxMarks} color="#425f50" label="Test A (Baseline)" />
           )}
           {finalScore !== null && (
-            <ScoreBar value={finalScore} max={maxMarks} color="#7c3aed" label="Test B (Final)" />
+            <ScoreBar value={finalScore} max={maxMarks} color="#787565" label="Test B (Final)" />
           )}
         </div>
       )}
@@ -198,9 +198,9 @@ export default function CompareResults() {
       {/* Change summary */}
       {marksDiff !== null && (
         <div style={{
-          background: improved ? '#f0fdf4' : decreased ? '#fef2f2' : '#f8fafc',
-          border: `2px solid ${improved ? '#86efac' : decreased ? '#fecaca' : '#e2e8f0'}`,
-          borderRadius: '20px', padding: '2rem', width: '100%', textAlign: 'center',
+          background: improved ? '#eef1e7' : decreased ? '#f5eeea' : '#f5f4ee',
+          border: `2px solid ${improved ? '#bdcbb1' : decreased ? '#dbc3b7' : '#dddfd4'}`,
+          borderRadius: '10px', padding: '2rem', width: '100%', textAlign: 'center',
           marginBottom: '2rem',
         }}>
           <div style={{ fontSize: '0.82rem', fontWeight: 700, color: changeColor, textTransform: 'uppercase',
@@ -213,9 +213,9 @@ export default function CompareResults() {
           <div style={{ fontSize: '1.2rem', fontWeight: 700, color: changeColor, marginTop: 4 }}>
             {pctDiff !== null ? `${improved ? '+' : ''}${pctDiff} percentage points` : '—'}
           </div>
-          <p style={{ color: '#64748b', fontSize: '0.93rem', marginTop: '1rem', lineHeight: 1.5, maxWidth: 500, margin: '1rem auto 0' }}>
+          <p style={{ color: '#697061', fontSize: '0.93rem', marginTop: '1rem', lineHeight: 1.5, maxWidth: 500, margin: '1rem auto 0' }}>
             {improved
-              ? `Great job! Spatial intelligence learning helped you gain ${marksDiff} more mark${marksDiff !== 1 ? 's' : ''} — a ${pctDiff} percentage-point improvement.`
+              ? `Great job! {session?.dominant_intelligence || 'Personalised'} learning helped you gain ${marksDiff} more mark${marksDiff !== 1 ? 's' : ''} — a ${pctDiff} percentage-point improvement.`
               : decreased
               ? `Your score decreased by ${Math.abs(marksDiff)} mark${Math.abs(marksDiff) !== 1 ? 's' : ''}. This is important data — not every experiment shows improvement.`
               : 'Your score remained the same in both attempts. This is also a valid experimental result.'}
@@ -225,15 +225,15 @@ export default function CompareResults() {
 
       {/* Detailed metrics table */}
       <div className="card" style={{ padding: '1.8rem', marginBottom: '2rem' }}>
-        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: '#0f172a', marginBottom: '1.2rem' }}>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: '#263c34', marginBottom: '1.2rem' }}>
            Detailed Metrics
         </h3>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.93rem' }}>
           <thead>
-            <tr style={{ background: '#f8fafc' }}>
-              <th style={{ textAlign: 'left', padding: '10px 12px', color: '#64748b', fontWeight: 700, borderBottom: '2px solid #e2e8f0' }}>Metric</th>
-              <th style={{ textAlign: 'center', padding: '10px 12px', color: '#2563eb', fontWeight: 700, borderBottom: '2px solid #e2e8f0' }}>Test A</th>
-              <th style={{ textAlign: 'center', padding: '10px 12px', color: '#7c3aed', fontWeight: 700, borderBottom: '2px solid #e2e8f0' }}>Test B</th>
+            <tr style={{ background: '#f5f4ee' }}>
+              <th style={{ textAlign: 'left', padding: '10px 12px', color: '#697061', fontWeight: 700, borderBottom: '2px solid #dddfd4' }}>Metric</th>
+              <th style={{ textAlign: 'center', padding: '10px 12px', color: '#425f50', fontWeight: 700, borderBottom: '2px solid #dddfd4' }}>Test A</th>
+              <th style={{ textAlign: 'center', padding: '10px 12px', color: '#787565', fontWeight: 700, borderBottom: '2px solid #dddfd4' }}>Test B</th>
             </tr>
           </thead>
           <tbody>
@@ -242,19 +242,19 @@ export default function CompareResults() {
               { label: 'Percentage',            a: basePct,       b: finalPct,   suffix: '%' },
               { label: 'Maximum Marks',         a: maxMarks,      b: maxMarks,   suffix: '' },
             ].map(row => (
-              <tr key={row.label} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                <td style={{ padding: '10px 12px', color: '#334155', fontWeight: 600 }}>{row.label}</td>
-                <td style={{ padding: '10px 12px', textAlign: 'center', color: '#2563eb', fontWeight: 700 }}>
+              <tr key={row.label} style={{ borderBottom: '1px solid #eeefe7' }}>
+                <td style={{ padding: '10px 12px', color: '#35443e', fontWeight: 600 }}>{row.label}</td>
+                <td style={{ padding: '10px 12px', textAlign: 'center', color: '#425f50', fontWeight: 700 }}>
                   {row.a !== null ? `${row.a}${row.suffix}` : '—'}
                 </td>
-                <td style={{ padding: '10px 12px', textAlign: 'center', color: '#7c3aed', fontWeight: 700 }}>
+                <td style={{ padding: '10px 12px', textAlign: 'center', color: '#787565', fontWeight: 700 }}>
                   {row.b !== null ? `${row.b}${row.suffix}` : '—'}
                 </td>
               </tr>
             ))}
             {marksDiff !== null && (
-              <tr style={{ background: improved ? '#f0fdf4' : decreased ? '#fef2f2' : '#f8fafc' }}>
-                <td style={{ padding: '10px 12px', color: '#334155', fontWeight: 700 }}>Change (B − A)</td>
+              <tr style={{ background: improved ? '#eef1e7' : decreased ? '#f5eeea' : '#f5f4ee' }}>
+                <td style={{ padding: '10px 12px', color: '#35443e', fontWeight: 700 }}>Change (B − A)</td>
                 <td colSpan={2} style={{ padding: '10px 12px', textAlign: 'center', color: changeColor, fontWeight: 900 }}>
                   {improved ? '+' : ''}{marksDiff} marks &nbsp;|&nbsp;
                   {pctDiff !== null ? `${improved ? '+' : ''}${pctDiff} pp` : '—'}
@@ -263,7 +263,7 @@ export default function CompareResults() {
             )}
           </tbody>
         </table>
-        <div style={{ marginTop: '0.8rem', fontSize: '0.78rem', color: '#94a3b8' }}>
+        <div style={{ marginTop: '0.8rem', fontSize: '0.78rem', color: '#697061' }}>
           pp = percentage points &nbsp;·&nbsp; Both tests used identical questions and marking criteria.
         </div>
       </div>
@@ -274,10 +274,10 @@ export default function CompareResults() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.2rem' }}>
             <span style={{ fontSize: '1.6rem' }}></span>
             <div>
-              <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: '1.3rem', color: '#0f172a', fontWeight: '800' }}>
+              <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: '1.3rem', color: '#263c34', fontWeight: '800' }}>
                 Question-by-Question Deep AI Evaluation
               </h3>
-              <p style={{ margin: 0, fontSize: '0.85rem', color: '#64748b' }}>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: '#697061' }}>
                 Full response comparison between Test A and Test B evaluated by AI against curriculum model answers.
               </p>
             </div>
@@ -297,55 +297,55 @@ export default function CompareResults() {
                 <div key={q.id || idx} style={{
                   background: '#ffffff',
                   borderRadius: '18px',
-                  border: isBetter ? '2px solid #86efac' : '1px solid #e2e8f0',
+                  border: isBetter ? '2px solid #bdcbb1' : '1px solid #dddfd4',
                   padding: '1.4rem',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
+                  boxShadow: 'none'
                 }}>
                   {/* Header: Q Number, Type, Marks & Outcome Badge */}
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '0.8rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{
-                        background: '#eff6ff', color: '#2563eb', padding: '3px 10px',
+                        background: '#eef1e8', color: '#425f50', padding: '3px 10px',
                         borderRadius: '12px', fontSize: '0.78rem', fontWeight: 800
                       }}>
                         Q{idx + 1} · {q.type?.toUpperCase()}
                       </span>
-                      <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>
+                      <span style={{ fontSize: '0.8rem', color: '#697061', fontWeight: 600 }}>
                         ({q.marks} Mark{q.marks > 1 ? 's' : ''})
                       </span>
                     </div>
 
                     {isBetter && (
-                      <span style={{ background: '#dcfce7', color: '#15803d', padding: '3px 10px', borderRadius: '12px', fontSize: '0.78rem', fontWeight: 700 }}>
+                      <span style={{ background: '#e5ebdb', color: '#4e6a50', padding: '3px 10px', borderRadius: '12px', fontSize: '0.78rem', fontWeight: 700 }}>
                          +{finScore - baseScore} Mark Improvement
                       </span>
                     )}
                     {isSame && (
-                      <span style={{ background: '#f1f5f9', color: '#475569', padding: '3px 10px', borderRadius: '12px', fontSize: '0.78rem', fontWeight: 700 }}>
+                      <span style={{ background: '#eeefe7', color: '#586555', padding: '3px 10px', borderRadius: '12px', fontSize: '0.78rem', fontWeight: 700 }}>
                          Maintained Full Score
                       </span>
                     )}
                     {isWorse && (
-                      <span style={{ background: '#fee2e2', color: '#b91c1c', padding: '3px 10px', borderRadius: '12px', fontSize: '0.78rem', fontWeight: 700 }}>
+                      <span style={{ background: '#eee0d8', color: '#8c4740', padding: '3px 10px', borderRadius: '12px', fontSize: '0.78rem', fontWeight: 700 }}>
                          Needs Review
                       </span>
                     )}
                   </div>
 
                   {/* Question Text */}
-                  <div style={{ fontSize: '1.02rem', fontWeight: 700, color: '#1e293b', marginBottom: '1rem', lineHeight: 1.5 }}>
+                  <div style={{ fontSize: '1.02rem', fontWeight: 700, color: '#35443e', marginBottom: '1rem', lineHeight: 1.5 }}>
                     {cleanMathText(q.text)}
                   </div>
 
                   {/* Best / Model Answer */}
                   <div style={{
-                    background: '#f0fdf4',
-                    border: '1px solid #bbf7d0',
+                    background: '#eef1e7',
+                    border: '1px solid #c8d3bb',
                     borderRadius: '12px',
                     padding: '0.8rem 1rem',
                     marginBottom: '1rem',
                     fontSize: '0.88rem',
-                    color: '#166534'
+                    color: '#425e44'
                   }}>
                     <strong> Best / Curriculum Answer:</strong> {cleanMathText(q.correctAnswer)}
                   </div>
@@ -354,27 +354,27 @@ export default function CompareResults() {
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
                     {/* Test A Card */}
                     <div style={{
-                      background: '#f8fafc',
-                      border: '1px solid #e2e8f0',
+                      background: '#f5f4ee',
+                      border: '1px solid #dddfd4',
                       borderRadius: '12px',
                       padding: '1rem'
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#2563eb' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#425f50' }}>
                            Test A (Baseline)
                         </span>
                         <span style={{
                           fontSize: '0.82rem', fontWeight: 800,
-                          color: base?.isCorrect ? '#16a34a' : '#dc2626'
+                          color: base?.isCorrect ? '#52715b' : '#99594c'
                         }}>
                           {base?.marksObtained ?? 0} / {q.marks}
                         </span>
                       </div>
-                      <div style={{ fontSize: '0.9rem', color: '#1e293b', fontWeight: 600, marginBottom: '6px' }}>
-                        {cleanMathText(base?.studentAnswer) || <em style={{ color: '#94a3b8' }}>No answer provided</em>}
+                      <div style={{ fontSize: '0.9rem', color: '#35443e', fontWeight: 600, marginBottom: '6px' }}>
+                        {cleanMathText(base?.studentAnswer) || <em style={{ color: '#697061' }}>No answer provided</em>}
                       </div>
                       {base?.feedback && (
-                        <div style={{ fontSize: '0.8rem', color: '#64748b', borderTop: '1px solid #e2e8f0', paddingTop: '6px', marginTop: '6px' }}>
+                        <div style={{ fontSize: '0.8rem', color: '#697061', borderTop: '1px solid #dddfd4', paddingTop: '6px', marginTop: '6px' }}>
                            {cleanMathText(base.feedback)}
                         </div>
                       )}
@@ -382,27 +382,27 @@ export default function CompareResults() {
 
                     {/* Test B Card */}
                     <div style={{
-                      background: fin?.isCorrect ? '#faf5ff' : '#f8fafc',
-                      border: fin?.isCorrect ? '1px solid #d8b4fe' : '1px solid #e2e8f0',
+                      background: fin?.isCorrect ? '#f3f0e7' : '#f5f4ee',
+                      border: fin?.isCorrect ? '1px solid #d3ceb9' : '1px solid #dddfd4',
                       borderRadius: '12px',
                       padding: '1rem'
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#7c3aed' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#787565' }}>
                            Test B (After Spatial Learning)
                         </span>
                         <span style={{
                           fontSize: '0.82rem', fontWeight: 800,
-                          color: fin?.isCorrect ? '#16a34a' : '#dc2626'
+                          color: fin?.isCorrect ? '#52715b' : '#99594c'
                         }}>
                           {fin?.marksObtained ?? 0} / {q.marks}
                         </span>
                       </div>
-                      <div style={{ fontSize: '0.9rem', color: '#1e293b', fontWeight: 600, marginBottom: '6px' }}>
-                        {cleanMathText(fin?.studentAnswer) || <em style={{ color: '#94a3b8' }}>No answer provided</em>}
+                      <div style={{ fontSize: '0.9rem', color: '#35443e', fontWeight: 600, marginBottom: '6px' }}>
+                        {cleanMathText(fin?.studentAnswer) || <em style={{ color: '#697061' }}>No answer provided</em>}
                       </div>
                       {fin?.feedback && (
-                        <div style={{ fontSize: '0.8rem', color: '#64748b', borderTop: '1px solid #e2e8f0', paddingTop: '6px', marginTop: '6px' }}>
+                        <div style={{ fontSize: '0.8rem', color: '#697061', borderTop: '1px solid #dddfd4', paddingTop: '6px', marginTop: '6px' }}>
                            {cleanMathText(fin.feedback)}
                         </div>
                       )}

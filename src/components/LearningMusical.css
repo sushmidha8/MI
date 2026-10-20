@@ -1,24 +1,54 @@
-.musical-learning { max-width: 900px; padding-top: 2rem; padding-bottom: 3rem; }
-.song-lesson { width: 100%; background: white; border: 1px solid #e2e8f0; border-radius: 24px; padding: clamp(20px, 5vw, 44px); box-shadow: 0 12px 32px #0f172a0f; color: #334155; }
-.song-eyebrow { display: flex; align-items: center; gap: 8px; color: #be185d; font-weight: 700; }
-.song-lesson h1 { color: #0f172a; font-size: clamp(1.6rem, 4vw, 2.2rem); margin: 1rem 0 .65rem; }
-.song-intro, .song-origin { color: #64748b; line-height: 1.7; }
-.song-languages { display: flex; gap: 10px; margin: 1.5rem 0; }
-.song-languages button { padding: 10px 20px; border: 2px solid #e2e8f0; background: white; border-radius: 10px; color: #9d174d; font: inherit; font-weight: 700; cursor: pointer; }
-.song-languages button[aria-pressed=true] { background: #fdf2f8; border-color: #be185d; }
-.song-languages button:disabled { cursor: wait; opacity: .6; }
-.song-player { margin: 1.5rem 0 2rem; }
-.song-player audio { display: block; width: 100%; }
-.song-lesson h2 { font-size: 1.25rem; margin: 0; color: #0f172a; }
-.song-player p { line-height: 1.7; margin: 12px 0 18px; }
-.song-message { padding: 14px 16px; border-radius: 12px; background: #ffffffb3; border: 1px solid #e2e8f0; }
-.song-error { background: #fff1f2; border-color: #fecdd3; color: #9f1239; }
-.song-message p { margin: 0 0 12px; }
-.song-track { padding: 16px 0; }
-.song-track h3 { font-size: 1rem; margin: 0 0 12px; }
-.song-track audio { width: 100%; }
-.song-lyric-text { white-space: pre-wrap; line-height: 1.9; font-size: 1.05rem; overflow-wrap: anywhere; margin-top: 20px; }
-.song-source { color: #64748b; font-size: .85rem; line-height: 1.8; margin-top: 2rem; }
-.song-source a { color: #2563eb; }
-.song-next { border-top: 1px solid #e2e8f0; padding-top: 1.5rem; margin-top: 1.5rem; }
-.song-lesson button:focus-visible, .song-lesson a:focus-visible { outline: 3px solid #7c3aed; outline-offset: 4px; }
+.page.musical-learning { max-width: 1140px; align-items: stretch; padding-top: 1.8rem; }
+.musical-learning > .back-btn { margin-bottom: 1.2rem; }
+.music-page-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 2.1rem; }
+.music-page-heading h1 { margin: 0 0 .65rem; font-size: clamp(2rem, 4vw, 3rem); }
+.music-page-heading p { color: var(--text-muted); font-size: .9rem; }
+.music-layout { display: grid; grid-template-columns: 330px minmax(0, 1fr); align-items: start; gap: 1.6rem; }
+.song-listening-panel { border: 1px solid var(--card-border); border-radius: 10px; background: var(--card-bg); overflow: hidden; position: sticky; top: 1.5rem; }
+.song-artwork { height: 240px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; background: #dfe5d5; padding: 1.5rem; position: relative; }
+.artwork-label { letter-spacing: .2em; font-size: .55rem; color: #53634a; }
+.artwork-caption { font-family: var(--font-display); font-style: italic; font-size: .85rem; color: #596b4e; }
+.record-disc { width: 155px; height: 155px; border-radius: 50%; background: repeating-radial-gradient(circle, #3c5143 0, #3c5143 2px, #354a3c 3px, #354a3c 4px); display: grid; place-items: center; box-shadow: 8px 12px 15px #3c513b1c; border: 7px solid #3c5143; }
+.record-label { border-radius: 50%; width: 77px; height: 77px; background: #c8c7a9; border: 4px solid #b8b998; display: flex; align-items: center; justify-content: center; flex-direction: column; color: #42573f; gap: 2px; }
+.record-label span { font-family: var(--font-display); font-size: .6rem; letter-spacing: .2em; }
+.song-listening-body { padding: 1.6rem; }
+.song-listening-body .eyebrow { font-size: .57rem; }
+.song-listening-body h2 { font-size: 1.6rem; margin-bottom: .6rem; }
+.song-intro { color: var(--text-muted); font-size: .78rem; line-height: 1.75; }
+.song-languages { margin: .1rem 0 .2rem; }
+.song-player { margin-top: 1.1rem; }
+.song-player audio { display: block; width: 100%; height: 42px; }
+.song-player p { margin-top: .8rem; color: var(--text-muted); font-size: .65rem; display: flex; align-items: center; gap: .35rem; }
+.song-lesson { min-width: 0; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 2.2rem; box-shadow: var(--card-shadow); }
+.song-lyrics-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-bottom: 1.4rem; border-bottom: 1px solid var(--card-border); }
+.song-lyrics-heading .eyebrow { font-size: .58rem; margin-bottom: .5rem; }
+.song-lyrics-heading h2 { font-size: 1.8rem; margin: 0; }
+.lyric-language { font-size: .57rem; letter-spacing: .1em; color: var(--text-muted); }
+.song-lyric-text { white-space: pre-wrap; font-family: var(--font-display); font-size: 1.03rem; line-height: 2.05; overflow-wrap: anywhere; margin: 1.5rem -.45rem 0; }
+.song-lyrics[lang=ta] .song-lyric-text { font-family: var(--font-body); font-size: .9rem; line-height: 2.2; }
+.lyric-line { display: block; border-radius: 4px; padding: .1rem .45rem; border-left: 2px solid transparent; transition: background .2s; }
+.lyric-section { font-family: var(--font-body); color: var(--text-muted); font-size: .75rem; }
+.lyric-active { background: #edf1e6; color: #344e3d; border-left-color: #8b9f7f; }
+.song-source { display: flex; gap: .7rem; align-items: flex-start; border-top: 1px solid var(--card-border); margin-top: 1.8rem; padding-top: 1.3rem; color: var(--text-muted); font-size: .67rem; line-height: 1.9; }
+.song-source svg { flex-shrink: 0; margin-top: 3px; }
+.song-source a { color: var(--primary-color); }
+.song-placeholder, .song-status { color: var(--text-muted); font-size: .85rem; margin-top: 1.5rem; }
+.song-progress { padding: 1rem; margin-top: 1rem; border: 1px solid var(--card-border); border-radius: 7px; background: var(--surface-soft); font-size: .75rem; }
+.song-progress progress { width: 100%; margin-top: .5rem; accent-color: var(--primary-color); }
+.song-message { padding: 1rem; border-radius: 7px; border: 1px solid var(--card-border); margin-top: 1rem; font-size: .8rem; }
+.song-error { background: #f7efeb; border-color: #dec6bc; color: var(--error-color); }
+.song-message p { margin-bottom: .8rem; }
+.musical-learning > .lesson-next .eyebrow { margin-bottom: .4rem; font-size: .6rem; }
+@media (max-width: 900px) {
+  .music-layout { grid-template-columns: 285px minmax(0, 1fr); gap: 1rem; }
+  .song-lesson { padding: 1.5rem; } .song-listening-body { padding: 1.3rem; }
+  .song-artwork { height: 240px; } .record-disc { width: 168px; height: 168px; }
+}
+@media (max-width: 680px) {
+  .song-listening-panel { position: static; }
+  .music-page-heading { align-items: flex-start; } .music-page-heading > .pill { display: none; }
+  .music-layout { grid-template-columns: 1fr; }
+  .song-artwork { height: 245px; } .record-disc { width: 160px; height: 160px; }
+  .song-listening-body { padding: 1.5rem; }
+  .song-lesson { padding: 1.5rem; } .song-lyric-text { font-size: 1rem; }
+}

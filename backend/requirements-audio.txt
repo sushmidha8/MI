@@ -1,0 +1,10 @@
+# Install these into backend/audio_runtime or the application's Python environment.
+# MMS voice models are downloaded separately into backend/audio_assets/models/.
+imageio-ffmpeg==0.6.0
+soundfile==0.14.0
+pyworld==0.3.5
+numpy>=1.26,<2
+scipy>=1.12
+torch>=2.6
+transformers>=4.33,<5
+safetensors

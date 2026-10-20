@@ -37,15 +37,15 @@ export default function LearningSpatial() {
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', marginBottom: '2rem' }}>
         <a href="/hunt.html" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', width: '100%', maxWidth: '700px' }}>
           <div className="interactive-card" 
-               style={{ flexDirection: 'column', padding: '2rem', width: '100%', cursor: 'pointer', borderTop: '4px solid #f59e0b' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%', borderBottom: '1px solid #f59e0b', paddingBottom: '1rem', marginBottom: '1rem' }}>
-              <div className="card-title" style={{ fontSize: '1.5rem', color: '#0f172a' }}>Activity: Treasure Hunt Challenge</div>
+               style={{ flexDirection: 'column', padding: '2rem', width: '100%', cursor: 'pointer', borderTop: '2px solid #857455' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%', borderBottom: '1px solid #857455', paddingBottom: '1rem', marginBottom: '1rem' }}>
+              <div className="card-title" style={{ fontSize: '1.5rem', color: '#263c34' }}>Activity: Treasure Hunt Challenge</div>
             </div>
             <div style={{ color: 'var(--text-main)', lineHeight: '1.6', fontSize: '1.1rem' }}>
               <p>Put your visualization and mental mapping skills to the test! Navigate through a challenging environment to find the hidden treasure.</p>
             </div>
             <div style={{ marginTop: '1.5rem', width: '100%', textAlign: 'center' }}>
-              <div className="btn primary-btn" style={{ background: '#f59e0b', borderColor: '#f59e0b', display: 'inline-block' }}>Launch Treasure Hunt</div>
+              <div className="btn primary-btn" style={{ background: '#857455', borderColor: '#857455', display: 'inline-block' }}>Launch Treasure Hunt</div>
             </div>
           </div>
         </a>

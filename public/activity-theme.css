@@ -1,0 +1,33 @@
+/* Match the activity frame to the main site's quiet, academic palette. */
+:root { --gold:#607555; --amber:#8d7b58; --parchment:#35443e; --ink:#263c34; --sky-col:#6d8276; --coral-red:#9b514b; --lime:#52715b; --card:#fffefa; --border:#dddfd4; }
+body { background:#f5f4ee; color:#35443e; font-family:'Segoe UI',Arial,sans-serif; cursor:auto; }
+#bg-canvas { display:none; }
+.screen { padding:32px 20px; }
+.start-hero,.win-card,.q-main { border:1px solid #dddfd4; border-radius:12px; background:#fffefa; box-shadow:0 5px 24px #263c340a; }
+.start-content { background:#fffefa; }
+.start-content::before { display:none; }
+.start-title,.win-title,.q-text,.start-btn,.hud-badge,.hud-score,.opt-letter-badge,.score-num { font-family:Palatino,Georgia,serif; text-shadow:none; font-weight:400; }
+.start-title { color:#263c34; font-size:2.5rem; }
+.start-sub,.win-sub,.q-instruction,.hint-text,.ff-text,.opt-desc,.score-lbl,.map-pin-label { color:#697061; }
+.start-badge,.skill-pill,.badge,.skill-tag,.hud-badge,.q-zone-pill { border:1px solid #d6ddcd; background:#eef1e7; color:#52715b; border-radius:7px; font-weight:500; }
+.skill-pill:hover { border-color:#8b9c7f; color:#425f50; transform:none; }
+.start-btn { background:#425f50; color:#fffefa; border-radius:7px; box-shadow:none; padding:15px 38px; font-family:'Segoe UI',Arial,sans-serif; font-size:.9rem; font-weight:600; }
+.start-btn:hover { background:#304b3d; box-shadow:none; transform:none; }
+.start-btn::after { display:none; }
+.map-container,.hint-box,.funfact-box { background:#eef1e7; border:1px solid #d6ddcd; border-radius:8px; }
+.map-label { color:#697061; }
+.map-pin,.map-chest { background:#fffefa; border:1px solid #d0d8c6; box-shadow:none; color:#425f50; }
+.map-pin.active,.map-chest.unlocked,.map-pin.done { border-color:#819772; background:#e4ead9; box-shadow:none; animation:none; }
+.map-path-done { background:#819772; box-shadow:none; }
+.q-text { font-size:1.2rem; color:#263c34; }
+.opt-btn { background:#fffefa; border:1px solid #dddfd4; border-radius:8px; }
+.opt-btn:hover { border-color:#9bab8c; background:#f3f4ec; transform:translateY(-2px); box-shadow:none; }
+.opt-title { color:#35443e; font-weight:600; }
+.toast { background:#fffefa; box-shadow:0 4px 20px #263c3410; border-radius:8px; font-weight:600; max-width:94vw; white-space:normal; }
+.toast.success { border:1px solid #b9c9ac; }.toast.error { border:1px solid #dcc5bd; }
+.score-ring { border-color:#c2ceb5; box-shadow:none; }.score-ring::before { background:#fffefa; }
+.win-trophy { filter:none; }
+.hero-scene,.q-diagram-wrap,.opt-img-strip,.win-collage { filter:saturate(.55); }
+button:focus-visible { outline:2px solid #425f50; outline-offset:4px; }
+@media(max-width:600px) { .start-content,.win-body { padding:24px 20px; }.options-grid { grid-template-columns:1fr; }.start-title { font-size:2rem; }.screen { padding:20px 12px; } }
+@media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; } }

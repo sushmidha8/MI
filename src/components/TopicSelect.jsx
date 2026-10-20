@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-const TERM_COLORS = { 1: '#2563eb', 2: '#059669', 3: '#7c3aed' };
+const TERM_COLORS = { 1: '#425f50', 2: '#52715b', 3: '#787565' };
 const TERM_LABELS = { 1: 'Term 1', 2: 'Term 2', 3: 'Term 3' };
 
 export default function TopicSelect({ user }) {
@@ -156,7 +156,7 @@ export default function TopicSelect({ user }) {
   if (error) {
     return (
       <div className="page">
-        <div className="card" style={{ textAlign: 'center', color: '#ef4444' }}>
+        <div className="card" style={{ textAlign: 'center', color: '#9b514b' }}>
           <p> {error}</p>
           <button className="btn back-btn" onClick={() => navigate('/results')}>← Back to Results</button>
         </div>
@@ -174,7 +174,7 @@ export default function TopicSelect({ user }) {
   const topicTitle = selectedSubtopic?.title;
 
   return (
-    <div className="page" style={{ paddingTop: '2rem', maxWidth: '860px' }}>
+    <div className="page topic-page" style={{ paddingTop: '2rem', maxWidth: '860px' }}>
       <button className="btn back-btn" onClick={() => navigate('/results')}>← Back to Results</button>
 
       <h2 className="glow-text section-title" style={{ fontSize: '2.2rem' }}>
@@ -183,25 +183,25 @@ export default function TopicSelect({ user }) {
 
       {/* Dominant Intelligence Banner */}
       {dominantIntel && (
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(37,99,235,0.12) 0%, rgba(139,92,246,0.12) 100%)',
-          border: '1px solid rgba(37,99,235,0.35)',
+        <div className="topic-notice" style={{
+          background: '#eeefe5',
+          border: '1px solid rgba(66,95,80,0.35)',
           borderRadius: '16px', padding: '1rem 1.5rem',
           marginBottom: '2rem', width: '100%', textAlign: 'center'
         }}>
-          <div style={{ fontSize: '1.05rem', color: '#2563eb', fontWeight: 700 }}>
-             Your Dominant Intelligence: <span style={{ color: '#7c3aed' }}>{dominantIntel}</span>
+          <div style={{ fontSize: '1.05rem', color: '#425f50', fontWeight: 700 }}>
+             Your Dominant Intelligence: <span style={{ color: '#787565' }}>{dominantIntel}</span>
           </div>
         </div>
       )}
 
       {/* Instruction banner */}
-      <div style={{
-        background: '#fffbeb', border: '1px solid #fbbf24', borderRadius: '14px',
+      <div className="topic-notice" style={{
+        background: '#f1eee1', border: '1px solid #c6b993', borderRadius: '14px',
         padding: '1rem 1.4rem', marginBottom: '2rem', width: '100%'
       }}>
-        <div style={{ fontWeight: 700, color: '#92400e', marginBottom: '4px' }}> Important Instructions</div>
-        <ul style={{ margin: 0, paddingLeft: '1.4rem', color: '#78350f', fontSize: '0.93rem', lineHeight: '1.7' }}>
+        <div style={{ fontWeight: 700, color: '#7a694c', marginBottom: '4px' }}> Important Instructions</div>
+        <ul style={{ margin: 0, paddingLeft: '1.4rem', color: '#736247', fontSize: '0.93rem', lineHeight: '1.7' }}>
           <li>You will first read the textbook content, then take <strong>Test A</strong>.</li>
           <li>After Test A, you'll learn through your dominant intelligence, then take <strong>Test B</strong>.</li>
           <li>The same topic is used throughout the entire experiment.</li>
@@ -210,21 +210,22 @@ export default function TopicSelect({ user }) {
 
       {/* Language Selection */}
       <div style={{ width: '100%', marginBottom: '2rem' }}>
-        <h3 style={{ fontSize: '1.1rem', color: '#0f172a', marginBottom: '0.8rem', fontFamily: 'var(--font-display)' }}>
+        <h3 style={{ fontSize: '1.1rem', color: '#263c34', marginBottom: '0.8rem', fontFamily: 'var(--font-display)' }}>
            Select Your Preferred Language
         </h3>
         <div style={{ display: 'flex', gap: '1rem' }}>
           {['English', 'Tamil'].map(lang => (
             <button
               key={lang}
+              aria-pressed={language === lang}
               onClick={() => chooseLanguage(lang)}
               style={{
                 flex: 1, padding: '0.9rem', borderRadius: '12px', fontWeight: 700,
                 fontSize: '1rem', cursor: 'pointer', transition: 'all 0.2s',
-                border: language === lang ? '2px solid #2563eb' : '2px solid #e2e8f0',
-                background: language === lang ? '#eff6ff' : 'white',
-                color: language === lang ? '#2563eb' : '#64748b',
-                boxShadow: language === lang ? '0 0 0 4px rgba(37,99,235,0.15)' : 'none',
+                border: language === lang ? '2px solid #425f50' : '2px solid #dddfd4',
+                background: language === lang ? '#eef1e8' : 'white',
+                color: language === lang ? '#425f50' : '#697061',
+                boxShadow: language === lang ? '0 0 0 4px rgba(66,95,80,0.15)' : 'none',
               }}
             >
               {lang === 'English' ? ' English' : ' Tamil'}
@@ -235,15 +236,15 @@ export default function TopicSelect({ user }) {
 
       {/* Topic Cards by Term */}
       <div ref={chapterListRef} style={{ width: '100%', scrollMarginTop: 20 }}>
-        <h3 style={{ fontSize: '1.1rem', color: '#0f172a', marginBottom: '1.2rem', fontFamily: 'var(--font-display)' }}>
+        <h3 style={{ fontSize: '1.1rem', color: '#263c34', marginBottom: '1.2rem', fontFamily: 'var(--font-display)' }}>
            1. Select a Class 6 Science Chapter
         </h3>
-        {[1, 2, 3].map(term => (
-          <div key={term} style={{ marginBottom: '1.5rem' }}>
+        <div className="chapter-grid">{[1, 2, 3].map(term => (
+          <div key={term} className="chapter-card-list">
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: '8px',
               background: `${TERM_COLORS[term]}18`, border: `1px solid ${TERM_COLORS[term]}40`,
-              borderRadius: '20px', padding: '4px 14px', marginBottom: '0.8rem',
+              borderRadius: '10px', padding: '4px 14px', marginBottom: '0.8rem',
               color: TERM_COLORS[term], fontWeight: 700, fontSize: '0.88rem'
             }}>
                {TERM_LABELS[term]}
@@ -262,7 +263,7 @@ export default function TopicSelect({ user }) {
                       padding: '1rem 1.3rem', borderRadius: '14px', cursor: 'pointer',
                       transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', gap: '1rem',
                       width: '100%', textAlign: 'left', fontFamily: 'inherit',
-                      border: isSelected ? `2px solid ${TERM_COLORS[term]}` : '2px solid #e2e8f0',
+                      border: isSelected ? `2px solid ${TERM_COLORS[term]}` : '2px solid #dddfd4',
                       background: isSelected ? `${TERM_COLORS[term]}10` : 'white',
                       boxShadow: isSelected ? `0 0 0 3px ${TERM_COLORS[term]}25` : '0 1px 3px rgba(0,0,0,0.05)',
                     }}
@@ -277,8 +278,8 @@ export default function TopicSelect({ user }) {
                       {topic.chapter}
                     </div>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontWeight: 600, color: '#0f172a', fontSize: '1rem' }}>{title}</div>
-                      <div style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '2px' }}>
+                      <div style={{ fontWeight: 600, color: '#263c34', fontSize: '1rem' }}>{title}</div>
+                      <div style={{ fontSize: '0.82rem', color: '#697061', marginTop: '2px' }}>
                         Chapter {topic.chapter}
                       </div>
                     </div>
@@ -290,28 +291,28 @@ export default function TopicSelect({ user }) {
               })}
             </div>
           </div>
-        ))}
+        ))}</div>
       </div>
 
       {selectedTopic && (
-        <section ref={topicSectionRef} aria-labelledby="chapter-topics-title" style={{ width: '100%', marginTop: '1.5rem', padding: '1.5rem', background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: 16, scrollMarginTop: 20 }}>
-          <h3 id="chapter-topics-title" style={{ color: '#0f172a', marginBottom: 8 }}>
+        <section ref={topicSectionRef} aria-labelledby="chapter-topics-title" style={{ width: '100%', marginTop: '1.5rem', padding: '1.5rem', background: '#f5f4ee', border: '1px solid #c6cdbd', borderRadius: 16, scrollMarginTop: 20 }}>
+          <h3 id="chapter-topics-title" style={{ color: '#263c34', marginBottom: 8 }}>
             2. Choose a topic in {language === 'English' ? selectedTopic.titleEn : selectedTopic.titleTa}
           </h3>
-          <p style={{ color: '#64748b', marginBottom: 16 }}>Select one textbook topic to study and practise.</p>
+          <p style={{ color: '#697061', marginBottom: 16 }}>Select one textbook topic to study and practise.</p>
           <button type="button" className="btn back-btn" onClick={() => chapterListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>Choose another chapter ↑</button>
           {loadingSubtopics && <p role="status">Reading chapter topics from your textbook…</p>}
-          {sectionError && <p role="alert" style={{ color: '#b91c1c' }}>{sectionError}</p>}
+          {sectionError && <p role="alert" style={{ color: '#8c4740' }}>{sectionError}</p>}
           {!loadingSubtopics && !sectionError && subtopics.length === 0 && <p>No readable topics were found in this chapter. Please choose another chapter.</p>}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: 12 }}>
             {subtopics.map(section => (
               <button type="button" key={section.key} aria-pressed={selectedSubtopic?.key === section.key}
                 onClick={() => setSelectedSubtopic(section)}
                 style={{ padding: 16, textAlign: 'left', font: 'inherit', cursor: 'pointer', borderRadius: 12,
-                  border: selectedSubtopic?.key === section.key ? '2px solid #2563eb' : '2px solid #e2e8f0',
-                  background: selectedSubtopic?.key === section.key ? '#eff6ff' : '#fff', color: '#0f172a' }}>
+                  border: selectedSubtopic?.key === section.key ? '2px solid #425f50' : '2px solid #dddfd4',
+                  background: selectedSubtopic?.key === section.key ? '#eef1e8' : '#fff', color: '#263c34' }}>
                 <strong>{section.key} · {section.title}</strong>
-                <span style={{ display: 'block', color: '#64748b', fontSize: '.85rem', marginTop: 6 }}>Textbook PDF pages {section.page_start}–{section.page_end}</span>
+                <span style={{ display: 'block', color: '#697061', fontSize: '.85rem', marginTop: 6 }}>Textbook PDF pages {section.page_start}–{section.page_end}</span>
               </button>
             ))}
           </div>
@@ -322,13 +323,14 @@ export default function TopicSelect({ user }) {
       <div style={{ width: '100%', marginTop: '1.5rem', paddingBottom: '3rem' }}>
         {selectedSubtopic ? (
           <button
+            className="btn primary-btn"
             onClick={handleStart}
             disabled={creating}
             style={{
               width: '100%', padding: '1.1rem', borderRadius: '14px', border: 'none',
-              background: 'linear-gradient(135deg, #2563eb 0%, #7c3aed 100%)',
+              background: '#425f50',
               color: 'white', fontWeight: 800, fontSize: '1.1rem', cursor: 'pointer',
-              boxShadow: '0 8px 20px rgba(37,99,235,0.35)', transition: 'all 0.2s',
+              boxShadow: 'none', transition: 'all 0.2s',
               opacity: creating ? 0.7 : 1,
             }}
           >
@@ -339,8 +341,8 @@ export default function TopicSelect({ user }) {
           </button>
         ) : (
           <div style={{
-            textAlign: 'center', padding: '1rem', color: '#94a3b8',
-            border: '2px dashed #e2e8f0', borderRadius: '14px', fontSize: '0.95rem'
+            textAlign: 'center', padding: '1rem', color: '#697061',
+            border: '2px dashed #dddfd4', borderRadius: '14px', fontSize: '0.95rem'
           }}>
              {selectedTopic ? 'Choose a topic within your chapter to continue' : 'Select a chapter, then choose a topic to continue'}
           </div>

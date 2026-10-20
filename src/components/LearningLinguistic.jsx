@@ -45,30 +45,27 @@ export default function LearningLinguistic() {
   };
 
   return (
-    <div className="page" style={{ maxWidth: 880, paddingTop: '2rem', paddingBottom: '3rem' }}>
+    <div className="page reading-page" style={{ maxWidth: 880, paddingTop: '2rem', paddingBottom: '3rem' }}>
       <button className="btn back-btn" onClick={() => navigate('/exam-results/baseline')}>
         <ChevronLeft size={16} /> Back to Test A Results
       </button>
-      <article style={{ width: '100%', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 24, padding: 'clamp(20px, 5vw, 44px)', boxShadow: '0 12px 32px rgba(15,23,42,.06)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#7c3aed', fontWeight: 700 }}>
+      <article style={{ width: '100%', background: '#fff', border: '1px solid #dddfd4', borderRadius: 24, padding: 'clamp(20px, 5vw, 44px)', boxShadow: 'none' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#787565', fontWeight: 700 }}>
           <BookOpen size={22} /> Linguistic learning
         </div>
-        <h1 style={{ fontSize: 'clamp(1.6rem, 4vw, 2.2rem)', color: '#0f172a', margin: '1rem 0' }}>
+        <h1 style={{ fontSize: 'clamp(1.6rem, 4vw, 2.2rem)', color: '#263c34', margin: '1rem 0' }}>
           {textbook?.title || sessionStorage.getItem('currentTopicTitle') || 'Your textbook topic'}
         </h1>
-        <div role="group" aria-label="Reading language" style={{ display: 'flex', gap: 10, margin: '1.5rem 0' }}>
+        <div className="segmented-control" role="group" aria-label="Reading language" style={{ margin: '1.5rem 0' }}>
           {['English', 'Tamil'].map(lang => (
-            <button key={lang} type="button" aria-pressed={language === lang} onClick={() => changeLanguage(lang)}
-              style={{ padding: '10px 20px', borderRadius: 10, cursor: 'pointer', fontWeight: 700,
-                border: language === lang ? '2px solid #7c3aed' : '2px solid #e2e8f0',
-                background: language === lang ? '#f5f3ff' : '#fff', color: '#5b21b6' }}>
+            <button key={lang} type="button" aria-pressed={language === lang} onClick={() => changeLanguage(lang)}>
               {lang === 'Tamil' ? 'தமிழ்' : lang}
             </button>
           ))}
         </div>
-        {loading && <p role="status" style={{ color: '#64748b' }}><Loader2 size={20} /> Preparing your textbook explanation…</p>}
+        {loading && <p role="status" style={{ color: '#697061' }}><Loader2 size={20} /> Preparing your textbook explanation…</p>}
         {!loading && error && (
-          <div role="alert" style={{ color: '#b91c1c', padding: 20, background: '#fff1f2', borderRadius: 12 }}>
+          <div role="alert" style={{ color: '#8c4740', padding: 20, background: '#f5eeea', borderRadius: 12 }}>
             <p>{error}</p>
             <button className="btn" onClick={() => { setLoading(true); setRetry(n => n + 1); }}>Try again</button>
             <button className="btn back-btn" onClick={() => navigate('/topic-select')}>Choose a topic</button>
@@ -76,14 +73,14 @@ export default function LearningLinguistic() {
         )}
         {!loading && !error && textbook && (
           <div lang={language === 'Tamil' ? 'ta' : 'en'}>
-            <div style={{ color: '#334155', fontSize: '1.05rem', lineHeight: 1.9 }}>
+            <div style={{ color: '#35443e', fontSize: '1.05rem', lineHeight: 1.9 }}>
               {(textbook.explanation_paragraphs?.length ? textbook.explanation_paragraphs : textbook.brief_points || [textbook.content]).map((paragraph, index) => (
                 <p key={index} style={{ marginBottom: '1.25rem' }}>{paragraph}</p>
               ))}
             </div>
-            <p style={{ color: '#64748b', fontSize: '.85rem', lineHeight: 1.7 }}>{textbook.source_note}</p>
-            {textbook.source_url && <a href={textbook.source_url} target="_blank" rel="noreferrer" style={{ color: '#2563eb', display: 'inline-block', margin: '.5rem 0 1.5rem' }}>Read the original textbook pages </a>}
-            <div style={{ marginTop: '1.5rem', borderTop: '1px solid #e2e8f0', paddingTop: '1.5rem' }}>
+            <p style={{ color: '#697061', fontSize: '.85rem', lineHeight: 1.7 }}>{textbook.source_note}</p>
+            {textbook.source_url && <a href={textbook.source_url} target="_blank" rel="noreferrer" style={{ color: '#425f50', display: 'inline-block', margin: '.5rem 0 1.5rem' }}>Read the original textbook pages </a>}
+            <div style={{ marginTop: '1.5rem', borderTop: '1px solid #dddfd4', paddingTop: '1.5rem' }}>
               <button className="btn" onClick={() => { sessionStorage.setItem('examPhase', 'final'); navigate('/exam/final'); }}>
                 Take Final Test (Test B) <ArrowRight size={18} />
               </button>

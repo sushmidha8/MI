@@ -1,17 +1,10 @@
-"""Textbook lyrics and persistent song jobs for the official Suno connection.
-
-The official HTTP adapter is intentionally unavailable until its authenticated
-API documentation is supplied. Never send an official key to another provider.
-"""
-import hashlib
+"""Textbook-grounded lyrics and persistent storage for local lesson songs."""
 import json
 import re
 import sqlite3
 import threading
-import time
 from contextlib import closing
 from pathlib import Path
-from urllib.parse import urlparse, quote
 
 
 
@@ -19,41 +12,6 @@ class MusicError(Exception):
     def __init__(self, message, status=502):
         super().__init__(message)
         self.status = status
-
-
-class OfficialSunoClient:
-    # The public platform currently redirects to account sign-in, without a
-    # published request/response contract. Do not invent endpoints or use a
-    # third-party API with an official account key.
-    configured = False
-
-    def generate(self, draft):
-        raise MusicError("The official Suno connection needs its API documentation and server credentials before songs can be generated.", 503)
-
-    def status(self, task_id):
-        raise MusicError("The official Suno connection is not configured yet.", 503)
-
-
-def music_configuration():
-    return {"configured": OfficialSunoClient.configured, "provider": "Suno",
-            "message": "Your textbook lyrics are ready. The official Suno music connection is awaiting setup."}
-
-
-def recording_for(topic_key, subtopic_key, language, audio_dir=None):
-    """Only play a finished local recording for its exact topic and language."""
-    path = Path(__file__).with_name("learning_songs.json")
-    recordings = json.loads(path.read_text(encoding="utf-8"))
-    audio_dir = (audio_dir or Path(__file__).parent / "static" / "lesson_songs").resolve()
-    for recording in recordings:
-        if (recording["topic_key"] == topic_key and recording["subtopic_key"] == subtopic_key
-                and recording["language"] == language):
-            filename = recording["filename"]
-            audio_path = (audio_dir / filename).resolve()
-            if (audio_path.parent == audio_dir and audio_path.is_file()
-                    and audio_path.suffix.lower() in (".mp3", ".wav", ".ogg", ".m4a")):
-                return {"title": recording["title"], "lyrics": recording["lyrics"],
-                        "audio_url": f"http://localhost:8000/static/lesson_songs/{quote(filename)}"}
-    return None
 
 
 def music_style(title, language):
@@ -69,8 +27,12 @@ def music_style(title, language):
 
 def source_facts(selected):
     facts = []
-    for section in selected["learning_sections"]:
-        for point in section["points"]:
+    # Musical lessons use the selected topic's brief study facts, not every
+    # exercise and activity on the source pages. Detailed reading stays separate.
+    groups = ([selected["brief_points"]] if selected.get("brief_points")
+              else [section["points"] for section in selected["learning_sections"]])
+    for points in groups:
+        for point in points:
             # Keep lists and their introductory sentence together. Splitting at
             # every period turns numbered lists into meaningless one-word facts.
             point = re.sub(r"\s+", " ", point).strip()
@@ -150,13 +112,7 @@ def textbook_lyrics(selected, language, model=None):
     return {"title": selected["title"], "language": language, "lyrics": lyrics,
             "style": music_style(selected["title"], language), "facts": facts, "lyrics_origin": origin,
             "page_start": selected["page_start"], "page_end": selected["page_end"],
-            "music": music_configuration(), "can_generate": True}
-
-
-def safe_audio_url(value):
-    if isinstance(value, str) and urlparse(value).scheme == "https" and urlparse(value).netloc:
-        return value
-    return None
+            "can_generate": True}
 
 
 class SongStore:
@@ -178,62 +134,3 @@ class SongStore:
         with closing(self.connect()) as db:
             db.execute("INSERT OR REPLACE INTO songs VALUES (?, ?)", (key, json.dumps(data)))
             db.commit()
-
-
-class SunoSongs:
-    def __init__(self, store=None, provider=None):
-        self.store = store or SongStore()
-        self.provider = provider or OfficialSunoClient()
-
-    def fingerprint(self, draft):
-        return hashlib.sha256(json.dumps([draft["lyrics"], draft["style"], "official-suno"]).encode()).hexdigest()
-
-    def existing(self, draft):
-        return self.store.get(self.fingerprint(draft))
-
-    def generate(self, draft):
-        fingerprint = self.fingerprint(draft)
-        # Serialized creation prevents double clicks or concurrent students charging twice for the same song.
-        with self.store.lock:
-            saved = self.existing(draft)
-            if saved and saved["status"] != "failed":
-                return saved
-            if saved and time.time() - saved["created_at"] < 30:
-                raise MusicError("Wait a moment before retrying song generation.", 429)
-            task_id = self.provider.generate(draft)
-            if not isinstance(task_id, str) or not task_id:
-                raise MusicError("Suno did not return a song task.")
-            saved = {"id": fingerprint, "task_id": task_id, "status": "pending", "tracks": [],
-                     "lyrics": draft["lyrics"], "style": draft["style"], "title": draft["title"],
-                     "created_at": time.time(), "provider": "Suno"}
-            self.store.save(fingerprint, saved)
-            return saved
-
-    def status(self, song_id):
-        with self.store.lock:
-            saved = self.store.get(song_id)
-            if not saved:
-                raise MusicError("Song not found. Generate a song for this topic first.", 404)
-            if saved["status"] in ("complete", "failed"):
-                return saved
-            if time.time() - saved["created_at"] > 1200:
-                saved.update(status="failed", error="Song generation timed out. Please try again.")
-            else:
-                # Official HTTP adapter normalizes its documented response to
-                # pending/streaming/complete/failed and HTTPS track URLs.
-                result = self.provider.status(saved["task_id"])
-                state = result.get("status", "pending")
-                tracks = []
-                for item in result.get("tracks", []):
-                    audio = safe_audio_url(item.get("audio_url"))
-                    if audio:
-                        tracks.append({"id": item.get("id"), "title": item.get("title") or saved["title"],
-                                       "audio_url": audio})
-                if state in ("complete", "streaming") and tracks:
-                    saved.update(status=state, tracks=tracks)
-                elif state == "failed":
-                    saved.update(status="failed", error="Suno could not finish this song. Please try again.")
-                elif state == "complete":
-                    saved.update(status="failed", error="Suno returned no playable song. Please try again.")
-            self.store.save(song_id, saved)
-            return saved

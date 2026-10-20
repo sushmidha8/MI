@@ -42,7 +42,8 @@ from textbook_library import book_path, chapter_topics, lesson, page_range
 from fastapi.responses import FileResponse
 from exam_paper import build_paper, valid_paper
 from functools import lru_cache
-from music_learning import MusicError, SunoSongs, textbook_lyrics, music_configuration, recording_for
+from music_learning import MusicError, textbook_lyrics
+from local_songs import SongJobs
 
 # ── Load env ──────────────────────────────────────────────────────────────────
 BASE_DIR = Path(__file__).parent
@@ -203,7 +204,7 @@ class TextbookRequest(BaseModel):
     subtopic_key: Optional[str] = None
 
 
-suno_songs = SunoSongs()
+lesson_songs = SongJobs()
 
 
 @lru_cache(maxsize=256)
@@ -224,12 +225,12 @@ def cached_song_draft(topic_key, subtopic_key, language):
         # This edition has damaged font mappings in its extracted headings.
         selected["title"] = {"6.3": "மென்பொருளின் வகைகள்", "6.3.1": "இயக்க மென்பொருள்",
                              "6.3.2": "பயன்பாட்டு மென்பொருள்"}.get(subtopic_key, selected["title"])
-    source_key = "draft-" + hashlib.sha256(json.dumps(["lyrics-v3", topic_key, subtopic_key, language, selected["excerpt"]], ensure_ascii=False).encode()).hexdigest()
-    with suno_songs.store.lock:
-        draft = suno_songs.store.get(source_key)
+    source_key = "draft-" + hashlib.sha256(json.dumps(["lyrics-v5", topic_key, subtopic_key, language, selected["excerpt"]], ensure_ascii=False).encode()).hexdigest()
+    with lesson_songs.store.lock:
+        draft = lesson_songs.store.get(source_key)
         if draft is None:
             draft = textbook_lyrics(selected, language, get_gemini_client())
-            suno_songs.store.save(source_key, draft)
+            lesson_songs.store.save(source_key, draft)
     draft["source_note"] = f"Class 6 Science · Term {topic['term']} · Chapter {topic['chapter']} · Topic {subtopic_key} · PDF pages {selected['page_start']}–{selected['page_end']}"
     draft["source_url"] = f"http://localhost:8000/api/textbooks/{language}/{topic['term']}#page={selected['page_start']}"
     return draft
@@ -239,9 +240,7 @@ def cached_song_draft(topic_key, subtopic_key, language):
 def musical_lyrics(req: TextbookRequest):
     try:
         draft = dict(cached_song_draft(req.topic_key, req.subtopic_key, req.language))
-        draft["music"] = music_configuration()
-        draft["song"] = suno_songs.existing(draft)
-        draft["recording"] = recording_for(req.topic_key, req.subtopic_key, req.language)
+        draft["song"] = lesson_songs.ensure(draft)
         return draft
     except MusicError as exc:
         raise HTTPException(status_code=exc.status, detail=str(exc)) from exc
@@ -251,7 +250,7 @@ def musical_lyrics(req: TextbookRequest):
 def musical_generate(req: TextbookRequest):
     try:
         draft = cached_song_draft(req.topic_key, req.subtopic_key, req.language)
-        return suno_songs.generate(draft)
+        return lesson_songs.ensure(draft, retry=True)
     except MusicError as exc:
         raise HTTPException(status_code=exc.status, detail=str(exc)) from exc
 
@@ -261,7 +260,7 @@ def musical_song_status(song_id: str):
     if not re.fullmatch(r"[a-f0-9]{64}", song_id):
         raise HTTPException(status_code=404, detail="Song not found.")
     try:
-        return suno_songs.status(song_id)
+        return lesson_songs.status(song_id)
     except MusicError as exc:
         raise HTTPException(status_code=exc.status, detail=str(exc)) from exc
 

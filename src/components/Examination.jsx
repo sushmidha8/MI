@@ -196,7 +196,7 @@ export default function Examination() {
           <h2 className="glow-text">
             {isBaseline ? 'Generating Examination Questions...' : 'Loading Examination...'}
           </h2>
-          <p style={{ color: '#64748b', maxWidth: '500px', margin: '0 auto' }}>
+          <p style={{ color: '#697061', maxWidth: '500px', margin: '0 auto' }}>
             {isBaseline
               ? 'Preparing your questions…'
               : 'Retrieving your original Test A questions to ensure a fair comparison.'}
@@ -209,9 +209,9 @@ export default function Examination() {
   if (error) {
     return (
       <div className="page" style={{ paddingTop: '2rem' }}>
-        <div className="card" style={{ textAlign: 'center', color: '#ef4444' }}>
+        <div className="card" style={{ textAlign: 'center', color: '#9b514b' }}>
           <h3>Examination Load Error</h3>
-          <p style={{ color: '#64748b' }}>{error}</p>
+          <p style={{ color: '#697061' }}>{error}</p>
           <button className="btn back-btn" style={{ marginTop: '1.5rem' }}
             onClick={() => navigate(isBaseline ? '/topic-select' : '/spatial-learning')}>
             ← Go Back
@@ -249,28 +249,28 @@ export default function Examination() {
       {/* Header */}
       <div style={{
         width: '100%', background: isBaseline
-          ? 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)'
-          : 'linear-gradient(135deg, #1a0530 0%, #2d0a4e 100%)',
-        borderRadius: '20px', padding: '1.5rem',
-        border: isBaseline ? '2px solid #38bdf8' : '2px solid #a855f7',
-        marginBottom: '2rem', color: 'white',
+          ? '#e9ede0'
+          : '#e9ede0',
+        borderRadius: '10px', padding: '1.5rem',
+        border: isBaseline ? '2px solid #607b6b' : '2px solid #81755f',
+        marginBottom: '2rem', color: '#263c34',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem'
       }}>
         <div>
           <div style={{ fontSize: '0.8rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase',
-            color: isBaseline ? '#38bdf8' : '#a855f7', marginBottom: '4px' }}>
+            color: isBaseline ? '#607b6b' : '#81755f', marginBottom: '4px' }}>
             {isBaseline ? ' Test A — Baseline Examination' : ' Test B — Final Examination'}
           </div>
-          <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'white' }}>{topicTitle}</div>
-          <div style={{ fontSize: '0.85rem', color: '#94a3b8', marginTop: '6px' }}>
+          <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#263c34' }}>{topicTitle}</div>
+          <div style={{ fontSize: '0.85rem', color: '#697061', marginTop: '6px' }}>
             Language: {language} · {questions.length} questions · {totalMarks} total marks
             <br />Time remaining: {Math.floor(protocol.timeLeft / 60)}:{String(protocol.timeLeft % 60).padStart(2, '0')} · Departures: {protocol.warningCount}/3
           </div>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '0.82rem', color: '#94a3b8' }}>Answered</div>
+          <div style={{ fontSize: '0.82rem', color: '#697061' }}>Answered</div>
           <div style={{ fontSize: '1.8rem', fontWeight: 900,
-            color: answeredCount === questions.length ? '#34d399' : '#f59e0b' }}>
+            color: answeredCount === questions.length ? '#7d9875' : '#857455' }}>
             {answeredCount}/{questions.length}
           </div>
         </div>
@@ -278,8 +278,8 @@ export default function Examination() {
 
       {/* Instructions */}
       <div style={{
-        background: '#fffbeb', border: '1px solid #fbbf24', borderRadius: '12px',
-        padding: '1rem 1.3rem', marginBottom: '2rem', width: '100%', fontSize: '0.9rem', color: '#78350f'
+        background: '#f1eee1', border: '1px solid #c6b993', borderRadius: '12px',
+        padding: '1rem 1.3rem', marginBottom: '2rem', width: '100%', fontSize: '0.9rem', color: '#736247'
       }}>
         <strong> Instructions:</strong> Answer all questions carefully.
         MCQs are worth 1 mark each. {shortQuestions.length > 0 && 'Short-answer questions are worth 2 marks each. '}
@@ -289,8 +289,8 @@ export default function Examination() {
       {/* MCQ Section */}
       {mcqQuestions.length > 0 && (
         <div style={{ width: '100%', marginBottom: '2rem' }}>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', color: '#0f172a',
-            borderBottom: '2px solid #2563eb', paddingBottom: '8px', marginBottom: '1.2rem' }}>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', color: '#263c34',
+            borderBottom: '2px solid #425f50', paddingBottom: '8px', marginBottom: '1.2rem' }}>
             Section A — Multiple Choice Questions (1 mark each)
           </h3>
           {mcqQuestions.map((q, sectionIdx) => {
@@ -328,15 +328,15 @@ export default function Examination() {
       {/* Short Answer Section */}
       {shortQuestions.length > 0 && (
         <div style={{ width: '100%', marginBottom: '2rem' }}>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', color: '#0f172a',
-            borderBottom: '2px solid #059669', paddingBottom: '8px', marginBottom: '1.2rem' }}>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', color: '#263c34',
+            borderBottom: '2px solid #52715b', paddingBottom: '8px', marginBottom: '1.2rem' }}>
             Section B — Short Answer Questions (2 marks each)
           </h3>
           {shortQuestions.map((q, sectionIdx) => {
             const globalIdx = questions.indexOf(q);
             return (
               <div key={globalIdx} className="question-card" style={{ marginBottom: '1.2rem' }}>
-                <div className="weight-badge" style={{ background: '#f0fdf4', color: '#059669', borderColor: '#86efac' }}>
+                <div className="weight-badge" style={{ background: '#eef1e7', color: '#52715b', borderColor: '#bdcbb1' }}>
                   2 marks
                 </div>
                 <div className="question-text" style={{ fontSize: '1.05rem', paddingRight: '80px' }}>
@@ -349,13 +349,13 @@ export default function Examination() {
                   rows={4}
                   style={{
                     width: '100%', padding: '0.9rem', borderRadius: '10px',
-                    border: '1.5px solid #e2e8f0',
-                    fontSize: '1rem', outline: 'none', resize: 'vertical', color: '#1e293b',
-                    background: '#f8fafc', lineHeight: '1.6',
+                    border: '1.5px solid #dddfd4',
+                    fontSize: '1rem', outline: 'none', resize: 'vertical', color: '#35443e',
+                    background: '#f5f4ee', lineHeight: '1.6',
                     fontFamily: language === 'Tamil' ? "'Noto Sans Tamil', sans-serif" : 'inherit'
                   }}
-                  onFocus={e => e.target.style.borderColor = '#059669'}
-                  onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+                  onFocus={e => e.target.style.borderColor = '#52715b'}
+                  onBlur={e => e.target.style.borderColor = '#dddfd4'}
                 />
               </div>
             );
@@ -366,15 +366,15 @@ export default function Examination() {
       {/* Descriptive Section */}
       {descQuestions.length > 0 && (
         <div style={{ width: '100%', marginBottom: '2rem' }}>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', color: '#0f172a',
-            borderBottom: '2px solid #7c3aed', paddingBottom: '8px', marginBottom: '1.2rem' }}>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', color: '#263c34',
+            borderBottom: '2px solid #787565', paddingBottom: '8px', marginBottom: '1.2rem' }}>
             Section {shortQuestions.length ? 'C' : 'B'} — Descriptive Questions (5 marks each)
           </h3>
           {descQuestions.map((q, sectionIdx) => {
             const globalIdx = questions.indexOf(q);
             return (
               <div key={globalIdx} className="question-card" style={{ marginBottom: '1.2rem' }}>
-                <div className="weight-badge" style={{ background: '#f5f3ff', color: '#7c3aed', borderColor: '#c4b5fd' }}>
+                <div className="weight-badge" style={{ background: '#f0eee5', color: '#787565', borderColor: '#d3ceb9' }}>
                   5 marks
                 </div>
                 <div className="question-text" style={{ fontSize: '1.05rem', paddingRight: '80px' }}>
@@ -387,13 +387,13 @@ export default function Examination() {
                   rows={8}
                   style={{
                     width: '100%', padding: '0.9rem', borderRadius: '10px',
-                    border: '1.5px solid #e2e8f0',
-                    fontSize: '1rem', outline: 'none', resize: 'vertical', color: '#1e293b',
-                    background: '#f8fafc', lineHeight: '1.7',
+                    border: '1.5px solid #dddfd4',
+                    fontSize: '1rem', outline: 'none', resize: 'vertical', color: '#35443e',
+                    background: '#f5f4ee', lineHeight: '1.7',
                     fontFamily: language === 'Tamil' ? "'Noto Sans Tamil', sans-serif" : 'inherit'
                   }}
-                  onFocus={e => e.target.style.borderColor = '#7c3aed'}
-                  onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+                  onFocus={e => e.target.style.borderColor = '#787565'}
+                  onBlur={e => e.target.style.borderColor = '#dddfd4'}
                 />
               </div>
             );
@@ -405,8 +405,8 @@ export default function Examination() {
       <div style={{ width: '100%', marginBottom: '3rem' }}>
         {!allAnswered() && (
           <div style={{
-            background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px',
-            padding: '0.8rem 1.2rem', marginBottom: '1rem', color: '#b91c1c', fontSize: '0.9rem'
+            background: '#f5eeea', border: '1px solid #dbc3b7', borderRadius: '10px',
+            padding: '0.8rem 1.2rem', marginBottom: '1rem', color: '#8c4740', fontSize: '0.9rem'
           }}>
              Please answer all {questions.length} questions before submitting.
             ({answeredCount}/{questions.length} answered)
@@ -418,9 +418,9 @@ export default function Examination() {
           className="btn primary-btn"
           style={{
             width: '100%', fontSize: '1.1rem',
-            background: submitting ? '#94a3b8'
-              : isBaseline ? 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
-              : 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+            background: submitting ? '#697061'
+              : isBaseline ? '#425f50'
+              : '#425f50',
             opacity: (!allAnswered() && !submitting) ? 0.5 : 1,
             cursor: (!allAnswered() && !submitting) ? 'not-allowed' : 'pointer',
           }}

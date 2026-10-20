@@ -38,27 +38,45 @@ monitor tab/window departures, submit recorded answers on the third departure or
 when time expires, block clipboard actions, and warn before leaving the page.
 Timers continue while the window is in the background.
 
-## Musical learning and Suno connection
+## Generated musical lessons
 
-Musical learning displays textbook-based topic lyrics and plays finished local
-recordings through a native audio player. It contains no external music links,
-embeds, provider setup, copying, or file-upload controls.
+Opening musical learning automatically queues a topic-specific song. The backend
+synthesizes the textbook lyrics locally in English or Tamil, gives the voice a
+melody and bar-based timing, and mixes it with the supplied accompaniment. The
+page plays the resulting MP3 and highlights the current lyric line. There are no
+external music links, embeds, provider setup controls, or copy/upload controls.
+The voice is electronic synthetic singing; it is not a studio-quality singer.
 
-The intended audio workflow is to separate the reference song's instrumental,
-synthesize new topic-specific sung vocals, and mix those vocals with that backing
-track. The reference audio file is still needed: the supplied share link can be
-played remotely, but its direct audio download returned HTTP 403, and no matching
-MP3/WAV was found locally. No replacement-vocal songs have been generated yet.
+Audio setup on a new checkout:
 
-Finished audio belongs in ignored `backend/static/lesson_songs/`. Register each
-recording in `backend/learning_songs.json` with `topic_key`, `subtopic_key`,
-`language`, `title`, `filename`, and its exact `lyrics`. A recording is played
-only for its exact topic and language, and only when the local file exists.
-The registry is currently empty. Never substitute the original full-vocal song
-or speech over its existing vocals for a newly generated topic song.
+```sh
+python -m pip install -r backend/requirements-audio.txt
+python backend/setup_audio.py --backing "C:/path/to/background.weba"
+```
 
-Run music tests with `python -m unittest discover -s backend -p 'test_music_learning.py'`.
-They mock provider HTTP calls and do not spend credits.
+This workspace has its small decoder/vocoder packages installed under ignored
+`backend/audio_runtime/`; the renderer also supports normal Python installation.
+The imported accompaniment is `backend/audio_assets/backing-track.weba`. English
+and Tamil voice weights are in `backend/audio_assets/models/`. These files and
+all generated audio are ignored. Keep the source accompaniment available when
+copying the project. Restart FastAPI after replacing it.
+
+A single CPU worker renders songs in the background. Lyrics, backing fingerprint,
+language, and renderer version identify each cached song. Completed MP3s and
+line timings are saved in `backend/static/lesson_songs/` and `backend/music.db`.
+Requests for the same song reuse it; interrupted jobs resume when polled; failed
+jobs show a retry action. Synthesis needs no music API account or network access
+after model setup. Topic lyrics use the textbook section and an optional Gemini
+rewrite, with a factual local fallback when Gemini is unavailable.
+
+The voice models are Meta's [MMS English](https://huggingface.co/facebook/mms-tts-eng)
+and [MMS Tamil](https://huggingface.co/facebook/mms-tts-tam), licensed **CC-BY-NC 4.0**
+for noncommercial use. Credit: Vineel Pratap et al., *Scaling Speech Technology to
+1,000+ Languages* (Meta AI, 2023). Pitch and timing synthesis uses the
+[WORLD vocoder](https://github.com/JeremyCCHsu/Python-Wrapper-for-World-Vocoder).
+
+Run music checks with `python -m unittest discover -s backend -p 'test_music_learning.py'`.
+Queue/cache tests use a fake renderer; real audio is verified separately.
 
 ```sh
 npm run build

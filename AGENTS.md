@@ -22,7 +22,7 @@ Install Python dependencies with `python -m pip install -r backend/requirements.
 
 ## Coding Style & Naming Conventions
 
-Use ES modules and functional React components. Name component files in PascalCase (for example, `TopicSelect.jsx`), JavaScript helpers in camelCase, and Python modules/functions in snake_case. Match surrounding formatting: frontend code generally uses two-space indentation, while backend code uses four spaces. Preserve each file's existing quote and semicolon style. ESLint is configured; no dedicated formatter is configured.
+Use ES modules and functional React components. Name component files in PascalCase (for example, `TopicSelect.jsx`), JavaScript helpers in camelCase, and Python modules/functions in snake_case. Match surrounding formatting: frontend code generally uses two-space indentation, while backend code uses four spaces. Preserve each file's existing quote and semicolon style. ESLint is configured; no dedicated formatter is configured. Reuse the muted ivory/sage tokens and shared controls in `src/index.css`; use `SiteChrome.jsx` for the website header/footer. Keep keyboard focus visible and support narrow screens.
 
 ## Testing Guidelines
 
@@ -30,8 +30,8 @@ Run textbook checks with `python -m unittest discover -s backend -p 'test_*.py'`
 
 ## Commit & Pull Request Guidelines
 
-This checkout contains no Git metadata, so existing commit conventions cannot be verified. Use concise, imperative subjects such as `Fix musical assessment scoring`. Keep PRs focused, describe behavior changes, link relevant issues, and include screenshots for UI changes plus validation results.
+The Git history uses concise subjects with conventional prefixes, such as `feat: complete multi-intelligence assessment, textbook learning, and examination modules`. Use `feat:` for features and `fix:` for corrections, followed by an imperative description. Keep PRs focused, describe behavior changes, link relevant issues, and include screenshots for UI changes plus validation results.
 
 ## Security & Configuration
 
-Store `YOUTUBE_API_KEY`, `GEMINI_API_KEY`, and `SUNO_API_KEY` in `backend/.env`. Keep secrets, SQLite databases, Python caches, and textbook PDFs out of commits, as specified in `.gitignore`. Official Suno API access is required before enabling automatic music generation; see the README for registering finished lesson recordings.
+Store `YOUTUBE_API_KEY` and `GEMINI_API_KEY` in `backend/.env`. Keep secrets, SQLite databases, Python caches, textbook PDFs, audio model weights, and generated songs out of commits. Musical learning uses a local CPU renderer and the supplied backing track; see the README for setup and the voice models' noncommercial license.

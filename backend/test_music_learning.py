@@ -1,32 +1,43 @@
-"""Song workflow tests use a fake provider and never spend music credits."""
-import json
+"""Local lyric, render-queue, cache, and topic selection checks."""
 import tempfile
-import time
 import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch
 
 from fastapi.testclient import TestClient
-
 import main
-from music_learning import MusicError, SongStore, SunoSongs, textbook_lyrics, music_configuration, recording_for
+from music_learning import MusicError, SongStore, textbook_lyrics
+from local_songs import SongJobs
+from local_song_renderer import lyric_lines, speech_text
 
 
 class SongTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
-        self.store = SongStore(Path(self.temp.name) / "songs.db")
+        self.root = Path(self.temp.name)
+        self.store = SongStore(self.root / 'songs.db')
+        self.out_patch = patch('local_songs.OUTPUT', self.root)
+        self.out_patch.start()
+        self.addCleanup(self.out_patch.stop)
+        self.hash_patch = patch('local_songs.backing_fingerprint', return_value='fixture-backing')
+        self.hash_patch.start()
+        self.addCleanup(self.hash_patch.stop)
         self.client = TestClient(main.app)
-        self.draft = textbook_lyrics({"title": "Length", "page_start": 5, "page_end": 6,
-            "learning_sections": [{"points": ["Length is the distance between two points.",
-                "The metre is its SI unit.", "Look straight down to avoid parallax error."]}]}, "English")
+        self.draft = textbook_lyrics({'title': 'Length', 'page_start': 5, 'page_end': 6,
+            'learning_sections': [{'points': ['Length is the distance between two points.',
+                'The metre is its SI unit.', 'Look straight down to avoid parallax error.']}]}, 'English')
 
-    def provider(self, responses):
-        provider = Mock()
-        provider.generate.return_value = "task-1"
-        provider.status.side_effect = responses
-        return SunoSongs(self.store, provider), provider
+    def jobs(self):
+        renderer = Mock()
+        def render(draft, key, progress):
+            progress('Recording vocals', 1, 2)
+            name = key + '.mp3'
+            (self.root / name).write_bytes(b'audio-fixture' * 100)
+            return {'title': draft['title'], 'lyrics': draft['lyrics'], 'filename': name,
+                    'audio_url': 'http://localhost:8000/static/lesson_songs/' + name}
+        renderer.render.side_effect = render
+        return SongJobs(self.store, renderer), renderer
 
     def test_rhymes_preserve_every_textbook_fact(self):
         for fact in self.draft["facts"]:
@@ -53,93 +64,97 @@ class SongTests(unittest.TestCase):
         self.assertIn("Length is measured in metres", draft["lyrics"])
         self.assertEqual(draft["lyrics_origin"], "Textbook facts with rhyming refrains")
 
-    def test_official_provider_requires_documentation_before_any_request(self):
-        self.assertFalse(music_configuration()["configured"])
-        self.assertEqual(music_configuration()["provider"], "Suno")
-        with self.assertRaises(MusicError) as error:
-            SunoSongs(self.store).generate(self.draft)
-        self.assertEqual(error.exception.status, 503)
-        self.assertIn("official Suno", str(error.exception))
 
-    def test_submit_uses_exact_lyrics_and_reuses_persisted_job(self):
-        songs, provider = self.provider([])
-        first = songs.generate(self.draft)
-        restarted = SunoSongs(SongStore(self.store.path), provider)
-        self.assertEqual(restarted.generate(self.draft)["id"], first["id"])
-        provider.generate.assert_called_once_with(self.draft)
-        self.assertEqual(first["lyrics"], self.draft["lyrics"])
-        self.assertEqual(first["provider"], "Suno")
+    def test_section_labels_are_not_sung(self):
+        self.assertEqual(lyric_lines('[Verse 1]\nFirst fact.\n\n[Chorus]\nSing it back.'),
+                         ['First fact.', 'Sing it back.'])
 
-    def test_pending_then_streaming_then_complete_filters_unsafe_urls(self):
-        songs, provider = self.provider([
-            {"status": "pending"},
-            {"status": "streaming", "tracks": [
-                {"id": "a", "audio_url": "javascript:alert(1)"},
-                {"id": "b", "audio_url": "https://audio.example/one.mp3"}]},
-            {"status": "complete", "tracks": [
-                {"id": "b", "audio_url": "https://audio.example/one.mp3"},
-                {"id": "c", "audio_url": "https://audio.example/two.mp3"}]},
-        ])
-        song = songs.generate(self.draft)
-        self.assertEqual(songs.status(song["id"])["status"], "pending")
-        streaming = songs.status(song["id"])
-        self.assertEqual(streaming["status"], "streaming")
-        self.assertEqual(len(streaming["tracks"]), 1)
-        complete = songs.status(song["id"])
-        self.assertEqual(complete["status"], "complete")
-        self.assertEqual(len(complete["tracks"]), 2)
-        songs.status(song["id"])
-        self.assertEqual(provider.status.call_count, 3)
+    def test_numbers_and_units_are_pronounced_instead_of_dropped(self):
+        self.assertEqual(speech_text('100°C and 2.5%', 'English'), 'one hundred degrees Celsius and two point five percent')
+        self.assertIn('ஒன்று பூஜ்ஜியம்', speech_text('10', 'Tamil'))
 
-    def test_failure_and_timeout_leave_no_fake_audio(self):
-        songs, _ = self.provider([{"status": "failed"}])
-        song = songs.generate(self.draft)
-        failed = songs.status(song["id"])
-        self.assertEqual(failed["status"], "failed")
-        self.assertEqual(failed["tracks"], [])
-        failed.update(status="pending", created_at=time.time() - 1300)
-        self.store.save(song["id"], failed)
-        self.assertIn("timed out", songs.status(song["id"])["error"])
+    def test_long_text_is_split_without_losing_words(self):
+        text = ' '.join(['measurement'] * 70)
+        lines = lyric_lines('[Verse]\n' + text)
+        self.assertGreater(len(lines), 1)
+        self.assertEqual(' '.join(lines), text)
 
-    def test_invalid_selection_does_not_reach_provider(self):
-        result = self.client.post('/api/music/generate', json={"topic_key": "t3_ch6", "language": "English", "subtopic_key": "invalid"})
-        self.assertEqual(result.status_code, 422)
+    def test_same_lyrics_are_queued_once_and_finished_audio_is_reused(self):
+        jobs, renderer = self.jobs()
+        first = jobs.ensure(self.draft)
+        jobs.ensure(self.draft)
+        jobs.queue.join()
+        finished = jobs.status(first['id'])
+        self.assertEqual(finished['status'], 'complete')
+        self.assertEqual(finished['recording']['lyrics'], self.draft['lyrics'])
+        restarted = SongJobs(SongStore(self.store.path), renderer)
+        self.assertEqual(restarted.ensure(self.draft)['status'], 'complete')
+        renderer.render.assert_called_once()
 
-    def test_api_returns_topic_specific_draft_and_no_secrets(self):
-        with patch.object(main, 'suno_songs', SunoSongs(self.store)), patch.object(main, 'get_gemini_client', return_value=None):
-            result = self.client.post('/api/music/lyrics', json={"topic_key": "t3_ch6", "subtopic_key": "6.3.2", "language": "English"})
+    def test_another_topic_language_or_backing_has_a_separate_song(self):
+        jobs, _ = self.jobs()
+        first = jobs.fingerprint(self.draft)
+        self.assertNotEqual(first, jobs.fingerprint({**self.draft, 'lyrics': 'A different topic.'}))
+        self.assertNotEqual(first, jobs.fingerprint({**self.draft, 'language': 'Tamil'}))
+        jobs.backing_hash = 'another-backing'
+        self.assertNotEqual(first, jobs.fingerprint(self.draft))
+
+    def test_missing_cached_file_is_rendered_again(self):
+        jobs, renderer = self.jobs()
+        first = jobs.ensure(self.draft)
+        jobs.queue.join()
+        (self.root / (first['id'] + '.mp3')).unlink()
+        jobs.ensure(self.draft)
+        jobs.queue.join()
+        self.assertEqual(renderer.render.call_count, 2)
+
+    def test_render_failure_can_be_retried_without_fake_audio(self):
+        jobs, renderer = self.jobs()
+        renderer.render.side_effect = RuntimeError('fixture failure')
+        with patch('local_songs.traceback.print_exc'):
+            first = jobs.ensure(self.draft)
+            jobs.queue.join()
+        failed = jobs.status(first['id'])
+        self.assertEqual(failed['status'], 'failed')
+        self.assertNotIn('recording', failed)
+        jobs.ensure(self.draft)
+        self.assertEqual(renderer.render.call_count, 1)
+        failed['updated_at'] = 0
+        self.store.save(first['id'], failed)
+        renderer.render.side_effect = lambda draft, key, progress: {'filename': 'retry.mp3', 'lyrics': draft['lyrics']}
+        jobs.ensure(self.draft, retry=True)
+        jobs.queue.join()
+        self.assertEqual(renderer.render.call_count, 2)
+
+    def test_interrupted_pending_job_resumes_on_status_poll(self):
+        jobs, renderer = self.jobs()
+        key = jobs.fingerprint(self.draft)
+        self.store.save(key, {'id': key, 'status': 'rendering', 'title': self.draft['title'],
+                             'language': 'English', 'lyrics': self.draft['lyrics']})
+        jobs.status(key)
+        jobs.queue.join()
+        self.assertEqual(jobs.status(key)['status'], 'complete')
+        renderer.render.assert_called_once()
+
+    def test_api_uses_the_selected_topic_and_returns_no_external_music_links(self):
+        jobs, _ = self.jobs()
+        with patch.object(main, 'lesson_songs', jobs), patch.object(main, 'get_gemini_client', return_value=None):
+            result = self.client.post('/api/music/lyrics', json={'topic_key': 't3_ch6', 'subtopic_key': '6.3.2', 'language': 'English'})
+            jobs.queue.join()
         self.assertEqual(result.status_code, 200)
         data = result.json()
-        self.assertEqual(data["title"], "Application Software")
-        self.assertIn("hard disk", data["lyrics"])
-        self.assertIn("drawing tools", data["lyrics"].lower())
-        self.assertNotIn("Heat", data["lyrics"])
-        self.assertNotIn("fixture-key", result.text)
+        self.assertEqual(data['title'], 'Application Software')
+        self.assertIn('hard disk', data['lyrics'])
+        self.assertNotIn('suno.com', result.text)
+        saved = jobs.status(data['song']['id'])
+        self.assertEqual(saved['recording']['lyrics'], data['lyrics'])
 
-    def test_software_song_uses_readable_tamil_despite_pdf_font_mapping(self):
-        with patch.object(main, 'suno_songs', SunoSongs(self.store)), patch.object(main, 'get_gemini_client', return_value=None):
-            result = self.client.post('/api/music/lyrics', json={"topic_key": "t3_ch6", "subtopic_key": "6.3", "language": "Tamil"})
-        self.assertEqual(result.status_code, 200)
-        data = result.json()
-        self.assertEqual(data["title"], "மென்பொருளின் வகைகள்")
-        self.assertIn("இயக்க முறைமை", data["lyrics"])
-        self.assertIn("வன்தட்டில்", data["lyrics"])
-
-    def test_shared_recording_only_appears_in_covered_english_topics(self):
-        for key in ('6.3', '6.3.1', '6.3.2'):
-            recording = recording_for('t3_ch6', key, 'English')
-            self.assertEqual(recording['title'], 'Software Song')
-            self.assertEqual(recording['embed_url'], 'https://suno.com/embed/0f2a8431-fad2-4d40-9499-260b9b70527f')
-            self.assertIn('Word processors help us write', recording['lyrics'])
-        self.assertIsNone(recording_for('t3_ch6', '6.3', 'Tamil'))
-        self.assertIsNone(recording_for('t2_ch1', '1.1', 'English'))
-
-    def test_lyrics_endpoint_returns_recording_and_matching_sung_lyrics(self):
-        with patch.object(main, 'suno_songs', SunoSongs(self.store)), patch.object(main, 'get_gemini_client', return_value=None):
-            result = self.client.post('/api/music/lyrics', json={"topic_key": "t3_ch6", "subtopic_key": "6.3", "language": "English"})
-        self.assertEqual(result.status_code, 200)
-        data = result.json()
-        self.assertEqual(data['lyrics'], data['recording']['lyrics'])
+    def test_invalid_selection_never_queues_a_render(self):
+        jobs, renderer = self.jobs()
+        with patch.object(main, 'lesson_songs', jobs):
+            response = self.client.post('/api/music/generate', json={'topic_key':'t3_ch6', 'subtopic_key':'invalid', 'language':'English'})
+        self.assertEqual(response.status_code, 422)
+        renderer.render.assert_not_called()
 
 
 if __name__ == '__main__':

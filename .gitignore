@@ -19,6 +19,9 @@ dist-ssr
 
 # Database
 *.db
+*.db-wal
+*.db-shm
+*.db-journal
 
 # Editor directories and files
 .vscode/*
@@ -34,6 +37,7 @@ dist-ssr
 *.env
 backend/.env
 backend/audio_assets/
+backend/audio_runtime/
 backend/static/lesson_songs/
 backend/__pycache__/
 __pycache__/

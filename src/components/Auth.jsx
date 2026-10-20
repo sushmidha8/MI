@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ArrowRight, BookOpen, Compass, Leaf, Music2 } from 'lucide-react';
 
 export default function Auth({ onLogin }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -72,81 +73,49 @@ export default function Auth({ onLogin }) {
     onLogin({ id: user.id, username: user.fullName, email: user.email });
   };
 
-  const errorStyle = { color: 'var(--error-color)', fontSize: '0.9rem', marginTop: '0.4rem', fontWeight: '500' };
+  const toggleMode = next => { setIsLogin(next); setErrors({}); };
+  const fieldError = name => errors[name] && <p className="field-error" role="alert">{errors[name]}</p>;
 
   return (
-    <div className="page" id="page-login" style={{ paddingTop: '2rem' }}>
-      <h1 className="glow-text title" style={{ fontSize: '3rem', textAlign: 'center' }}>Multi-Intelligence Platform</h1>
-      <p className="subtitle" style={{ marginBottom: '2rem' }}>Sign in to discover your potential</p>
-      
-      <div className="card" style={{ maxWidth: '450px', width: '100%', padding: '2rem' }}>
-        <div style={{ display: 'flex', marginBottom: '1.5rem', borderBottom: '1px solid rgba(138, 43, 226, 0.3)' }}>
-            <button 
-                onClick={() => { setIsLogin(true); setErrors({}); }}
-                style={{ flex: 1, padding: '0.8rem', background: 'transparent', border: 'none', color: isLogin ? 'var(--primary-color)' : 'var(--text-muted)', cursor: 'pointer', borderBottom: isLogin ? '2px solid var(--primary-color)' : 'none', fontSize: '1.1rem', fontFamily: 'var(--font-display)', fontWeight: isLogin ? '700' : '500' }}
-            >Sign In</button>
-            <button 
-                onClick={() => { setIsLogin(false); setErrors({}); }}
-                style={{ flex: 1, padding: '0.8rem', background: 'transparent', border: 'none', color: !isLogin ? 'var(--primary-color)' : 'var(--text-muted)', cursor: 'pointer', borderBottom: !isLogin ? '2px solid var(--primary-color)' : 'none', fontSize: '1.1rem', fontFamily: 'var(--font-display)', fontWeight: !isLogin ? '700' : '500' }}
-            >Sign Up</button>
+    <div className="page auth-page" id="page-login">
+      <section className="auth-intro" aria-labelledby="welcome-heading">
+        <span className="eyebrow">A different way to discover</span>
+        <h1 id="welcome-heading">Every mind has<br />its own <em>way.</em></h1>
+        <p>Discover how you learn best. Explore your strengths through words, visuals and music, then make every lesson your own.</p>
+        <div className="learning-art" aria-hidden="true">
+          <div className="art-arch" /><div className="art-circle" />
+          <div className="art-book" /><div className="art-book art-book-front"><BookOpen size={32} strokeWidth={1} /></div>
+          <Leaf className="art-sprig" size={38} strokeWidth={1} /><div className="art-ground" />
         </div>
-
-        {errors.global && <div style={{ color: '#ff4c4c', background: 'rgba(255, 76, 76, 0.1)', padding: '0.8rem', borderRadius: '8px', border: '1px solid #ff4c4c', marginBottom: '1rem', textAlign: 'center' }}>{errors.global}</div>}
-
-        <form onSubmit={isLogin ? handleSignIn : handleSignUp} style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-          
-          {!isLogin && (
-            <>
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--text-main)', fontWeight: '500' }}>Full Name</label>
-                <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} />
-                {errors.fullName && <div style={errorStyle}>{errors.fullName}</div>}
-              </div>
-              
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--text-main)', fontWeight: '500' }}>Age</label>
-                <input type="number" value={age} onChange={(e) => setAge(e.target.value)} />
-                {errors.age && <div style={errorStyle}>{errors.age}</div>}
-              </div>
-            </>
-          )}
-
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--text-main)', fontWeight: '500' }}>Email</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            {errors.email && <div style={errorStyle}>{errors.email}</div>}
-          </div>
-          
-          <div style={{ position: 'relative' }}>
-            <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--text-main)', fontWeight: '500' }}>Password</label>
-            <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '15px', top: '42px', background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', outline: 'none', fontWeight: 'bold' }}>{showPassword ? 'Hide' : 'Show'}</button>
-            {errors.password && <div style={errorStyle}>{errors.password}</div>}
-          </div>
-
-          {!isLogin && (
-            <div style={{ position: 'relative' }}>
-              <label style={{ display: 'block', marginBottom: '0.4rem', color: 'var(--text-main)', fontWeight: '500' }}>Confirm Password</label>
-              <input type={showConfirmPassword ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
-              <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} style={{ position: 'absolute', right: '15px', top: '42px', background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', outline: 'none', fontWeight: 'bold' }}>{showConfirmPassword ? 'Hide' : 'Show'}</button>
-              {errors.confirmPassword && <div style={errorStyle}>{errors.confirmPassword}</div>}
-            </div>
-          )}
-
-          <button type="submit" className="btn primary-btn gold-hover" style={{ width: '100%', marginTop: '1rem', padding: '1.2rem' }}>
-            {isLogin ? 'Sign In' : 'Create Account'}
-          </button>
-          
+        <div className="auth-paths"><span><Compass size={14} /> Visual thinking</span><span><BookOpen size={14} /> Language</span><span><Music2 size={14} /> Music</span></div>
+      </section>
+      <section className="auth-form-card" aria-labelledby="auth-heading">
+        <span className="eyebrow">Your learning journey</span>
+        <h2 id="auth-heading">{isLogin ? 'Welcome back.' : 'Begin something good.'}</h2>
+        <p>{isLogin ? 'Sign in and pick up where you left off.' : 'Create your student account to get started.'}</p>
+        <div className="auth-tabs" role="group" aria-label="Account access">
+          <button type="button" aria-pressed={isLogin} onClick={() => toggleMode(true)}>Sign in</button>
+          <button type="button" aria-pressed={!isLogin} onClick={() => toggleMode(false)}>Create account</button>
+        </div>
+        {errors.global && <div className="form-error" role="alert">{errors.global}</div>}
+        <form onSubmit={isLogin ? handleSignIn : handleSignUp} className="auth-form">
+          {!isLogin && <>
+            <div><label htmlFor="full-name">Full name</label><input id="full-name" autoComplete="name" type="text" value={fullName} onChange={e => setFullName(e.target.value)} />{fieldError('fullName')}</div>
+            <div><label htmlFor="age">Age</label><input id="age" type="number" value={age} onChange={e => setAge(e.target.value)} />{fieldError('age')}</div>
+          </>}
+          <div><label htmlFor="email">Email address</label><input id="email" autoComplete="email" type="email" value={email} onChange={e => setEmail(e.target.value)} />{fieldError('email')}</div>
+          <div><label htmlFor="password">Password</label><div className="password-field">
+            <input id="password" autoComplete={isLogin ? 'current-password' : 'new-password'} type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} />
+            <button type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} onClick={() => setShowPassword(!showPassword)}>{showPassword ? 'Hide' : 'Show'}</button>
+          </div>{fieldError('password')}</div>
+          {!isLogin && <div><label htmlFor="confirm-password">Confirm password</label><div className="password-field">
+            <input id="confirm-password" autoComplete="new-password" type={showConfirmPassword ? 'text' : 'password'} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
+            <button type="button" aria-label={showConfirmPassword ? 'Hide confirmation password' : 'Show confirmation password'} onClick={() => setShowConfirmPassword(!showConfirmPassword)}>{showConfirmPassword ? 'Hide' : 'Show'}</button>
+          </div>{fieldError('confirmPassword')}</div>}
+          <button type="submit" className="btn primary-btn">{isLogin ? 'Continue to your dashboard' : 'Create account'}<ArrowRight size={16} /></button>
         </form>
-        
-        <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-            {isLogin ? "Don't have an account? " : "Already have an account? "}
-            <span style={{ color: 'var(--primary-color)', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => { setIsLogin(!isLogin); setErrors({}); }}>
-                {isLogin ? 'Sign Up' : 'Sign In'}
-            </span>
-        </div>
-
-      </div>
+        <p className="auth-switch">{isLogin ? 'New to Multi Intelligence? ' : 'Already have an account? '}<button type="button" className="text-button" onClick={() => toggleMode(!isLogin)}>{isLogin ? 'Get started' : 'Sign in'}</button></p>
+      </section>
     </div>
   );
 }
