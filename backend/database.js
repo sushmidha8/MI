@@ -13,7 +13,7 @@ const db = new sqlite.Database(dbPath, (err) => {
         console.error('Database opening error: ', err);
     } else {
         console.log('Connected to SQLite Database');
-        
+
         db.run(`CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
@@ -38,6 +38,60 @@ const db = new sqlite.Database(dbPath, (err) => {
             selected_option INTEGER NOT NULL,
             is_correct BOOLEAN NOT NULL,
             FOREIGN KEY (assessment_id) REFERENCES assessments(id)
+        )`);
+
+        // ── New tables for the multi-phase learning pipeline ──────────────────
+
+        db.run(`CREATE TABLE IF NOT EXISTS learning_sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            topic TEXT NOT NULL,
+            topic_key TEXT NOT NULL,
+            subtopic_key TEXT,
+            language TEXT NOT NULL,
+            dominant_intelligence TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )`);
+
+        // Upgrade existing local databases without changing older sessions.
+        db.all('PRAGMA table_info(learning_sessions)', (err, columns) => {
+            if (!err && !columns.some(column => column.name === 'subtopic_key')) {
+                db.run('ALTER TABLE learning_sessions ADD COLUMN subtopic_key TEXT');
+            }
+        });
+
+        db.run(`CREATE TABLE IF NOT EXISTS exam_questions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id INTEGER NOT NULL,
+            question_index INTEGER NOT NULL,
+            question_type TEXT NOT NULL,
+            question_text TEXT NOT NULL,
+            options TEXT,
+            correct_answer TEXT,
+            marks INTEGER NOT NULL DEFAULT 2,
+            FOREIGN KEY (session_id) REFERENCES learning_sessions(id)
+        )`);
+
+        db.run(`CREATE TABLE IF NOT EXISTS exam_attempts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id INTEGER NOT NULL,
+            phase TEXT NOT NULL,
+            total_marks_possible INTEGER NOT NULL DEFAULT 0,
+            marks_obtained REAL NOT NULL DEFAULT 0,
+            submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (session_id) REFERENCES learning_sessions(id)
+        )`);
+
+        db.run(`CREATE TABLE IF NOT EXISTS exam_answers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            attempt_id INTEGER NOT NULL,
+            question_id INTEGER NOT NULL,
+            student_answer TEXT,
+            marks_awarded REAL NOT NULL DEFAULT 0,
+            feedback TEXT,
+            FOREIGN KEY (attempt_id) REFERENCES exam_attempts(id),
+            FOREIGN KEY (question_id) REFERENCES exam_questions(id)
         )`);
     }
 });

@@ -30,3 +30,14 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.env
+*.env
+backend/.env
+backend/audio_assets/
+backend/static/lesson_songs/
+backend/__pycache__/
+__pycache__/
+*.py[cod]
+node_modules/
+books/*.pdf
+!books/README.md

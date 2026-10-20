@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useAssessmentProtocol from '../hooks/useAssessmentProtocol';
+import AssessmentProtocolNotice from './AssessmentProtocolNotice';
 
 const linguisticDataRaw = [
     { text: "Synonym: Enormous →", weight: 1, options: ["Heavy", "Huge", "Wide", "Tall"], answer: 1 },
@@ -29,7 +31,7 @@ const linguisticDataRaw = [
     { text: "In 'weather the storm,' 'weather' means:", weight: 3, options: ["Temperature outside", "Wear away", "Endure difficult situation"], answer: 2 }
 ];
 
-export const maxLinguisticScore = linguisticDataRaw.reduce((acc, q) => acc + q.weight, 0);
+const maxLinguisticScore = linguisticDataRaw.reduce((acc, q) => acc + q.weight, 0);
 
 function shuffleArray(array) {
   return [...array].sort(() => Math.random() - 0.5);
@@ -41,6 +43,9 @@ export default function LinguisticAssessment({ user }) {
   const [answers, setAnswers] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Pre-test instructions & proctoring timer state
+  const [testStarted, setTestStarted] = useState(false);
+
   useEffect(() => {
     const shuffledData = shuffleArray(linguisticDataRaw).map(q => ({
       ...q,
@@ -49,6 +54,12 @@ export default function LinguisticAssessment({ user }) {
     setData(shuffledData);
   }, []);
 
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
   const totalQuestions = data.length;
   const answeredCount = Object.keys(answers).length;
 
@@ -56,7 +67,10 @@ export default function LinguisticAssessment({ user }) {
     setAnswers({ ...answers, [qIdx]: valueIndex });
   };
 
+  const submissionLock = useRef(false);
   const calculateAndSubmit = async () => {
+    if (submissionLock.current) return;
+    submissionLock.current = true;
     setIsSubmitting(true);
     let score = 0;
     const answersToPost = [];
@@ -81,7 +95,8 @@ export default function LinguisticAssessment({ user }) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: user.id, type: 'Linguistic', score: normalizedScore })
         });
-        const assessmentData = await res.json();
+        if (!res.ok) throw new Error("Could not save your assessment");
+      const assessmentData = await res.json();
         
         for (const ans of answersToPost) {
             await fetch('http://localhost:3001/api/answers', {
@@ -91,18 +106,134 @@ export default function LinguisticAssessment({ user }) {
             });
         }
 
-        navigate('/dashboard');
+        navigate('/results');
     } catch (err) {
         console.error(err);
         alert('Failed to save assessment');
-        setIsSubmitting(false);
+        submissionLock.current = false;
+      setIsSubmitting(false);
     }
   };
 
+  const protocol = useAssessmentProtocol({ active: testStarted && !isSubmitting, onForceSubmit: calculateAndSubmit, durationSeconds: 1800 });
+  const { timeLeft } = protocol;
+
+  // STEP 1: PRE-TEST INSTRUCTIONS SCREEN
+  if (!testStarted) {
+    return (
+      <div className="page" style={{ paddingTop: '2rem' }}>
+        <button className="btn back-btn" data-assessment-navigation onClick={() => navigate('/dashboard')}>← Dashboard</button>
+        
+        <div style={{
+          maxWidth: '750px', margin: '1.5rem auto 0 auto',
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+          border: '2px solid #38bdf8', borderRadius: '24px', padding: '2.5rem',
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(56, 189, 248, 0.15)',
+          color: '#ffffff'
+        }}>
+          <div style={{
+            display: 'inline-block', background: 'rgba(56, 189, 248, 0.15)',
+            border: '1px solid #38bdf8', color: '#38bdf8',
+            padding: '6px 14px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold',
+            marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px'
+          }}>
+             PROCTORED TEST GUIDELINES
+          </div>
+
+          <h1 style={{ fontSize: '2.2rem', fontWeight: '800', margin: '0 0 1rem 0', color: '#ffffff' }}>
+            Linguistic Intelligence Assessment Instructions 
+          </h1>
+
+          <p style={{ color: '#94a3b8', fontSize: '1.05rem', lineHeight: '1.6', marginBottom: '2rem' }}>
+            Welcome! Before starting your Linguistic Intelligence Assessment, please review the rules and timing details carefully.
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', marginBottom: '2.5rem' }}>
+            
+            <div style={{ background: '#151c2c', border: '1px solid #28354e', borderRadius: '16px', padding: '1.2rem', display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+              <div>
+                <h4 style={{ margin: '0 0 4px 0', fontSize: '1.1rem', color: '#38bdf8' }}>30-Minute Time Limit</h4>
+                <p style={{ margin: 0, fontSize: '0.9rem', color: '#cbd5e1', lineHeight: '1.5' }}>
+                  You have <strong>30 minutes</strong> to answer all 25 verbal, vocabulary, and vocabulary analogy questions.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ background: '#151c2c', border: '1px solid #28354e', borderRadius: '16px', padding: '1.2rem', display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+              <div>
+                <h4 style={{ margin: '0 0 4px 0', fontSize: '1.1rem', color: '#ef4444' }}>Stay in the test window</h4>
+                <p style={{ margin: 0, fontSize: '0.9rem', color: '#cbd5e1', lineHeight: '1.5' }}>
+                  Do not switch browser tabs or minimize the window! <strong>3 warnings will automatically submit your assessment.</strong>
+                </p>
+              </div>
+            </div>
+
+            <div style={{ background: '#151c2c', border: '1px solid #28354e', borderRadius: '16px', padding: '1.2rem', display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+              <div>
+                <h4 style={{ margin: '0 0 4px 0', fontSize: '1.1rem', color: '#a855f7' }}>No AI Tools or External Assistance</h4>
+                <p style={{ margin: 0, fontSize: '0.9rem', color: '#cbd5e1', lineHeight: '1.5' }}>
+                  Copy, paste and right-click are blocked on this page. Complete all questions independently without external tools.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <div style={{ textAlign: 'center' }}>
+            <button
+              onClick={() => setTestStarted(true)}
+              style={{
+                background: 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)',
+                color: '#ffffff', border: 'none', borderRadius: '16px',
+                padding: '16px 36px', fontSize: '1.15rem', fontWeight: '800',
+                cursor: 'pointer', boxShadow: '0 10px 25px rgba(14, 165, 233, 0.4)',
+                transition: 'transform 0.2s ease'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.04)'}
+              onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              I Understand & Start Assessment 
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // STEP 2: ACTIVE TEST ASSESSMENT SCREEN
   return (
-    <div className="page" style={{ paddingTop: '2rem' }}>
-      <button className="btn back-btn" onClick={() => navigate('/dashboard')}>← Back</button>
-      <h2 className="glow-text section-title">Linguistic Intelligence Assessment</h2>
+    <div className="page" style={{ paddingTop: '1.5rem', userSelect: 'none' }}>
+      
+      <div inert={Boolean(protocol.warning || protocol.endReason)} style={{ display: 'contents' }}>
+      {/* Proctored Header & Timer Bar */}
+      <div style={{
+        width: '100%', maxWidth: '800px', margin: '0 auto 1.5rem auto',
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+        border: '2px solid #38bdf8', borderRadius: '16px', padding: '1rem 1.5rem',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        boxShadow: '0 8px 20px rgba(56, 189, 248, 0.2)'
+      }}>
+        <div>
+          <span style={{ fontSize: '0.85rem', color: '#38bdf8', fontWeight: 'bold', letterSpacing: '1px', textTransform: 'uppercase' }}>
+             PROCTORED ASSESSMENT MODE
+          </span>
+          <h2 style={{ fontSize: '1.3rem', color: '#ffffff', margin: '2px 0 0 0', fontWeight: '800' }}>
+            Linguistic Intelligence Test
+          </h2>
+        </div>
+
+        <div style={{
+          background: timeLeft < 120 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(56, 189, 248, 0.15)',
+          border: `1px solid ${timeLeft < 120 ? '#ef4444' : '#38bdf8'}`,
+          borderRadius: '12px', padding: '8px 16px', textAlign: 'center'
+        }}>
+          <div style={{ fontSize: '0.75rem', color: timeLeft < 120 ? '#ef4444' : '#94a3b8', fontWeight: 'bold' }}>TIME REMAINING</div>
+          <div style={{ fontSize: '1.4rem', fontWeight: '900', color: timeLeft < 120 ? '#ef4444' : '#38bdf8', fontFamily: 'monospace' }}>
+             {formatTime(timeLeft)}
+          </div>
+        </div>
+      </div>
+
       <div className="card">
         {data.map((q, qIdx) => (
           <div key={qIdx} className="question-card">
@@ -118,7 +249,6 @@ export default function LinguisticAssessment({ user }) {
                     onChange={() => handleSelect(qIdx, opt.originalIndex)}
                     checked={answers[qIdx] === opt.originalIndex}
                   />
-                  <div className="custom-radio"></div>
                   <span className="option-text">{opt.text}</span>
                 </label>
               ))}
@@ -126,6 +256,7 @@ export default function LinguisticAssessment({ user }) {
           </div>
         ))}
       </div>
+
       <div style={{ marginTop: '2rem', width: '100%', display: 'flex', justifyContent: 'center' }}>
         <button 
           className="btn primary-btn" 
@@ -141,6 +272,10 @@ export default function LinguisticAssessment({ user }) {
           {isSubmitting ? 'Submitting...' : 'Submit Assessment'}
         </button>
       </div>
+
+      </div>
+      <AssessmentProtocolNotice protocol={protocol} submitting={isSubmitting} />
+
     </div>
   );
 }

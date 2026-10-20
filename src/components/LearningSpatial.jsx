@@ -16,7 +16,6 @@ export default function LearningSpatial() {
              onClick={() => setIsPlaying(true)}
              style={{ flexDirection: 'column', padding: '2rem', maxWidth: '700px', cursor: 'pointer' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%', borderBottom: '1px solid var(--primary-color)', paddingBottom: '1rem', marginBottom: '1rem' }}>
-            <div className="card-icon" style={{ background: '#f0fdf4', color: '#16a34a' }}>📖</div>
             <div className="card-title" style={{ fontSize: '1.5rem' }}>Storytelling: Habitat of Animals</div>
           </div>
           <div style={{ color: 'var(--text-main)', lineHeight: '1.6', fontSize: '1.1rem' }}>
@@ -40,7 +39,6 @@ export default function LearningSpatial() {
           <div className="interactive-card" 
                style={{ flexDirection: 'column', padding: '2rem', width: '100%', cursor: 'pointer', borderTop: '4px solid #f59e0b' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%', borderBottom: '1px solid #f59e0b', paddingBottom: '1rem', marginBottom: '1rem' }}>
-              <div className="card-icon" style={{ background: '#fffbeb', color: '#d97706' }}>🗺️</div>
               <div className="card-title" style={{ fontSize: '1.5rem', color: '#0f172a' }}>Activity: Treasure Hunt Challenge</div>
             </div>
             <div style={{ color: 'var(--text-main)', lineHeight: '1.6', fontSize: '1.1rem' }}>

@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useAssessmentProtocol from '../hooks/useAssessmentProtocol';
+import AssessmentProtocolNotice from './AssessmentProtocolNotice';
 
 const DELAYED_AUDIO = ["Delay1.mp3", "d10.mp3", "d13.mp3", "d14(2).mp3", "d16.mp3", "d19.mp3", "d3.mp3", "d6.mp3", "d7.mp3", "delay2.mp3"];
 const NOT_DELAYED_AUDIO = ["12d.mp3", "d11.mp3", "d14.mp3", "d18.mp3", "d4.mp3", "d8.mp3", "do.mp3"];
@@ -12,14 +14,26 @@ const SECOND_BEEP = ["t10.mp3", "t12.mp3", "t2o.mp3", "t4.mp3", "t6.mp3", "t8(2)
 
 export default function MusicalAssessment({ user }) {
   const navigate = useNavigate();
+  
+  // Pre-test instructions & timer state
+  const [testStarted, setTestStarted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const submissionLock = useRef(false);
+
   // 0: S1 Intro, 1: S1 Ex1, 2: S1 Ex2, 3: S1 Test
   // 4: S2 Intro, 5: S2 Ex1, 6: S2 Ex2, 7: S2 Test
   // 8: S3 Intro, 9: S3 Ex1, 10: S3 Ex2, 11: S3 Test
   // 12: Final Compute
   const [step, setStep] = useState(0); 
+
+  const formatTime = (seconds) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
   
   const [exampleAnswer, setExampleAnswer] = useState(null);
-  const [audioEnded, setAudioEnded] = useState(false);
+  const [, setAudioEnded] = useState(false);
 
   const [sec1Questions, setSec1Questions] = useState([]);
   const [currentQ1, setCurrentQ1] = useState(0);
@@ -54,9 +68,144 @@ export default function MusicalAssessment({ user }) {
     setSec3Questions(questions); setStep(11); setCurrentQ3(0); setScore3(0); setExampleAnswer(null); setAudioEnded(false);
   };
 
+  // STEP 1: PRE-TEST INSTRUCTIONS SCREEN
+  const submitAssessment = async () => {
+    if (submissionLock.current) return;
+    submissionLock.current = true;
+    setIsSubmitting(true);
+    try {
+      const finalScore = Math.round(((score1 + score2 + score3) / 20) * 100);
+      const response = await fetch('http://localhost:3001/api/assessments', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, type: 'Musical', score: finalScore }),
+      });
+      if (!response.ok) throw new Error('Could not save your assessment');
+      navigate('/dashboard');
+    } catch (error) {
+      console.error(error);
+      submissionLock.current = false;
+      setIsSubmitting(false);
+      alert('Failed to save your assessment. Please retry submission.');
+    }
+  };
+  const protocol = useAssessmentProtocol({ active: testStarted && step < 12 && !isSubmitting, onForceSubmit: submitAssessment, durationSeconds: 1800 });
+  const { timeLeft } = protocol;
+
+  if (!testStarted) {
+    return (
+      <div className="page" style={{ paddingTop: '2rem' }}>
+        <button className="btn back-btn" data-assessment-navigation onClick={() => navigate('/dashboard')}>← Dashboard</button>
+        
+        <div style={{
+          maxWidth: '750px', margin: '1.5rem auto 0 auto',
+          background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+          border: '2px solid #38bdf8', borderRadius: '24px', padding: '2.5rem',
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(56, 189, 248, 0.15)',
+          color: '#ffffff'
+        }}>
+          <div style={{
+            display: 'inline-block', background: 'rgba(56, 189, 248, 0.15)',
+            border: '1px solid #38bdf8', color: '#38bdf8',
+            padding: '6px 14px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 'bold',
+            marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '1px'
+          }}>
+             PROCTORED TEST GUIDELINES
+          </div>
+
+          <h1 style={{ fontSize: '2.2rem', fontWeight: '800', margin: '0 0 1rem 0', color: '#ffffff' }}>
+            Musical Intelligence Assessment Instructions 
+          </h1>
+
+          <p style={{ color: '#94a3b8', fontSize: '1.05rem', lineHeight: '1.6', marginBottom: '2rem' }}>
+            Welcome! Before starting your Musical Intelligence Assessment, please review the rules and timing details carefully.
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem', marginBottom: '2.5rem' }}>
+            
+            <div style={{ background: '#151c2c', border: '1px solid #28354e', borderRadius: '16px', padding: '1.2rem', display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+              <div>
+                <h4 style={{ margin: '0 0 4px 0', fontSize: '1.1rem', color: '#38bdf8' }}>30-Minute Time Limit</h4>
+                <p style={{ margin: 0, fontSize: '0.9rem', color: '#cbd5e1', lineHeight: '1.5' }}>
+                  You have <strong>30 minutes</strong> to complete all 3 audio sections (Melody Delays, Same or Different Melodies, and Rhythm Beeps).
+                </p>
+              </div>
+            </div>
+
+            <div style={{ background: '#151c2c', border: '1px solid #28354e', borderRadius: '16px', padding: '1.2rem', display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+              <div>
+                <h4 style={{ margin: '0 0 4px 0', fontSize: '1.1rem', color: '#a855f7' }}>Headphones / Audio Required</h4>
+                <p style={{ margin: 0, fontSize: '0.9rem', color: '#cbd5e1', lineHeight: '1.5' }}>
+                  Ensure your audio/headphones are connected and set to a comfortable volume level.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ background: '#151c2c', border: '1px solid #28354e', borderRadius: '16px', padding: '1.2rem', display: 'flex', alignItems: 'flex-start', gap: '1rem' }}>
+              <div>
+                <h4 style={{ margin: '0 0 4px 0', fontSize: '1.1rem', color: '#ef4444' }}>Stay in the test window</h4>
+                <p style={{ margin: 0, fontSize: '0.9rem', color: '#cbd5e1', lineHeight: '1.5' }}>
+                  Do not switch browser tabs or minimize the window! <strong>3 warnings will automatically submit your assessment.</strong>
+                  {' '}Copy, paste and right-click are blocked. Work independently and keep this page open; the timer continues while you are away.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          <div style={{ textAlign: 'center' }}>
+            <button
+              onClick={() => setTestStarted(true)}
+              style={{
+                background: 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)',
+                color: '#ffffff', border: 'none', borderRadius: '16px',
+                padding: '16px 36px', fontSize: '1.15rem', fontWeight: '800',
+                cursor: 'pointer', boxShadow: '0 10px 25px rgba(14, 165, 233, 0.4)',
+                transition: 'transform 0.2s ease'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.04)'}
+              onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              I Understand & Start Assessment 
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="page" style={{ paddingTop: '2rem' }}>
-      <button className="btn back-btn" onClick={() => navigate('/dashboard')}>← Back to Dashboard</button>
+    <div className="page" style={{ paddingTop: '1.5rem', userSelect: 'none' }}>
+      
+      <div inert={Boolean(protocol.warning || protocol.endReason)} style={{ display: 'contents' }}>
+      {/* Proctored Header & Timer Bar */}
+      <div style={{
+        width: '100%', maxWidth: '800px', margin: '0 auto 1.5rem auto',
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+        border: '2px solid #38bdf8', borderRadius: '16px', padding: '1rem 1.5rem',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        boxShadow: '0 8px 20px rgba(56, 189, 248, 0.2)'
+      }}>
+        <div>
+          <span style={{ fontSize: '0.85rem', color: '#38bdf8', fontWeight: 'bold', letterSpacing: '1px', textTransform: 'uppercase' }}>
+             PROCTORED ASSESSMENT MODE
+          </span>
+          <h2 style={{ fontSize: '1.3rem', color: '#ffffff', margin: '2px 0 0 0', fontWeight: '800' }}>
+            Musical Intelligence Test
+          </h2>
+        </div>
+
+        <div style={{
+          background: timeLeft < 120 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(56, 189, 248, 0.15)',
+          border: `1px solid ${timeLeft < 120 ? '#ef4444' : '#38bdf8'}`,
+          borderRadius: '12px', padding: '8px 16px', textAlign: 'center'
+        }}>
+          <div style={{ fontSize: '0.75rem', color: timeLeft < 120 ? '#ef4444' : '#94a3b8', fontWeight: 'bold' }}>TIME REMAINING</div>
+          <div style={{ fontSize: '1.4rem', fontWeight: '900', color: timeLeft < 120 ? '#ef4444' : '#38bdf8', fontFamily: 'monospace' }}>
+             {formatTime(timeLeft)}
+          </div>
+        </div>
+      </div>
+      <button className="btn back-btn" data-assessment-navigation onClick={() => navigate('/dashboard')}>← Back to Dashboard</button>
       
       {/* SECTION 1 - INTRO */}
       {step === 0 && (
@@ -379,27 +528,12 @@ export default function MusicalAssessment({ user }) {
             </div>
 
             <p className="mt-4 text-muted" style={{ fontSize: '1.1rem', marginBottom: '2rem' }}>By finalizing, your musical intelligence score will be securely updated onto your Dashboard tracking profile.</p>
-            <button className="btn primary-btn gold-hover mt-4" style={{ padding: '1rem 2rem', fontSize: '1.2rem', width: '100%' }} onClick={async () => {
-                try {
-                    const finalScore = Math.round(((score1 + score2 + score3) / 20) * 100);
-                    const token = localStorage.getItem('token');
-                    await fetch('http://localhost:3001/api/assessments', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                        body: JSON.stringify({ 
-                            userId: user.id,
-                            type: 'Musical',
-                            score: finalScore 
-                        })
-                    });
-                    navigate('/dashboard');
-                } catch (e) {
-                    console.error("Submission error:", e);
-                    alert("Failed to submit score to database.");
-                }
-            }}>Return to Dashboard</button>
+            <button className="btn primary-btn gold-hover mt-4" style={{ padding: '1rem 2rem', fontSize: '1.2rem', width: '100%' }} onClick={submitAssessment} disabled={isSubmitting}>{isSubmitting ? 'Submitting…' : 'Return to Dashboard'}</button>
          </div>
       )}
+
+      </div>
+      <AssessmentProtocolNotice protocol={protocol} submitting={isSubmitting} />
 
     </div>
   );
